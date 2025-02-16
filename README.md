@@ -9,11 +9,7 @@
 
 下面是分类页实现的效果动图：
 
-![gif01](https://github.com/user-attachments/assets/50ad0719-82ff-4059-99e2-6fe3dceefde8)
-
-![gif01](https://upload-images.jianshu.io/upload_images/5823111-e2436a4dc055d4ff.gif?imageMogr2/auto-orient/strip)
-
-详细请看代码，需要的自行clone!
+![gif1](https://github.com/user-attachments/assets/45ac1ba6-9ed8-463e-90d5-1b45b6e3c6b6)
 
 
 
