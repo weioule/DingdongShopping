@@ -1,0 +1,127 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/weioule/.ohos/config/default_DingdongShopping_F5ktHPH9tIOEwA7KXeEy8J7S0Mw8OsTWbxRX8e43MC4=.cer",
+          "storePassword": "0000001B5975531B84E738F3AA42C584B60479D0A5E80EF7AA8C6BBAA5363E733F51532D3770698587BE05",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BEF7B7769D87FD112E61C0680853FAFE2F1B6BD2F8FBA1C8BE571E02DAAA405444E54DEFC666E44",
+          "profile": "/Users/weioule/.ohos/config/default_DingdongShopping_F5ktHPH9tIOEwA7KXeEy8J7S0Mw8OsTWbxRX8e43MC4=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/weioule/.ohos/config/default_DingdongShopping_F5ktHPH9tIOEwA7KXeEy8J7S0Mw8OsTWbxRX8e43MC4=.p12"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.1(13)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "module_classify",
+      "srcPath": "./module_classify",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "module_base",
+      "srcPath": "./module_base",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "module_home",
+      "srcPath": "./module_home",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "module_shopping_cart",
+      "srcPath": "./module_shopping_cart",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "module_user",
+      "srcPath": "./module_user",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "module_search",
+      "srcPath": "./module_search",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}
