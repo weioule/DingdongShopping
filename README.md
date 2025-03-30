@@ -12,7 +12,17 @@
 ![gif1](https://github.com/user-attachments/assets/45ac1ba6-9ed8-463e-90d5-1b45b6e3c6b6)
 
 
+30/3.<br>
+1.新增搜索商品功能<br>
+2.分类页输入框新增热门搜索滚动组件
 
+商品搜索功能有搜索关键字和搜索结果页两个页面，搜索关键字页面主要展示搜索记录、搜索推荐、搜索联想关键字。<br>
+搜索结果页面比较复杂一些，它涉及到了List的吸顶并与下拉刷新PullToRefresh以及瀑布流WaterFlow的嵌套滚动处理，
+瀑布流WaterFlow使用sections实现了单、多列布局并存的跨列布局分组效果。<br><br>
+基本实现了叮咚买菜苹果版app的商品搜索功能，目前他们的鸿蒙原生app的商品搜索功能还是比较粗糙的，还没有实现苹果版的效果，当然也有可能是原本就设计如此。<br><br>
+下面看下效果图：
+
+![img-ezgif com-resize](https://github.com/user-attachments/assets/4fa7cd76-5eac-4425-b0f8-a6fe8daf0522)
 
 
 
