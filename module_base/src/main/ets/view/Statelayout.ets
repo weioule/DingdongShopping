@@ -18,7 +18,7 @@ export struct StateLayout {
   build() {
     Column() {
       if (this.stateType > 0) {
-        Image(this.stateType == StateType.empty ? $r('app.media.app_data_empty') : $r('app.media.app_data_error'))
+        Image(this.stateType == StateType.empty ? $r("app.media.ic_empty") : $r("app.media.ic_error"))
           .width(80)
           .height(80)
       }
@@ -26,6 +26,7 @@ export struct StateLayout {
         .margin({ top: 20 })
         .fontSize(14)
         .fontColor($r('app.color.bg_color'))
+
       Text(StateType.empty ? '' : '轻触屏幕重试')
         .margin({ top: 10 })
         .fontSize(12)
@@ -33,8 +34,8 @@ export struct StateLayout {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor($r('app.color.bg_color'))
     .justifyContent(FlexAlign.Center)
+    .backgroundColor($r('app.color.bg_color'))
     .onClick(() => {
       if (this.clickRetry) {
         this.clickRetry()

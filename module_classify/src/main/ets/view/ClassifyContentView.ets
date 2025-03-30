@@ -1,7 +1,7 @@
 import { PullToRefresh } from 'module_base/src/main/ets/refresh/MyPullToRefresh';
 import { BaseDataSource } from 'module_base/src/main/ets/common/BaseDataSource';
 import { MyApp } from 'module_base/src/main/ets/common/Application';
-import { Classify, Commodity } from '../bean/ClassifyBean';
+import { Classify, Commodity } from 'module_base/src/main/ets/bean/ClassifyBean';
 import { ClassifyModel } from '../model/ClassifyModel';
 import { FirstClassifyItem } from './FirstClassifyItem';
 import { emitter } from '@kit.BasicServicesKit';
@@ -11,7 +11,7 @@ import { App } from '@kit.ArkUI';
 
 /**
  * @author weioule
- * @date 2025-02-012
+ * @date 2025-02-01
  * 分类页右侧内容列表组件
  */
 @Component
@@ -33,10 +33,11 @@ export struct ClassifyContentView {
   aboutToAppear(): void {
     App.setImageRawDataCacheSize(1024 * 1024 * 100); // 避免图片渲染闪缩使用缓存 解码前数据上限，单位为字节；约等于9.53M
     App.setImageCacheCount(100); // 设置内存中缓存解码后图片的数量上限
-    this.refreshConfigurator?.setRefreshTextPullUp1('下拉 至上一个分类')
-    this.refreshConfigurator?.setRefreshTextPullUp2('释放 至上一个分类')
-    this.refreshConfigurator?.setLoadTextPullUp1('上拉 至下一个分类')
-    this.refreshConfigurator?.setLoadTextPullUp2('释放 至下一个分类')
+    this.refreshConfigurator?.setHasLoadMore(true)
+    this.refreshConfigurator?.setTxtPullDownRefresh('下拉 至上一个分类')
+    this.refreshConfigurator?.setTxtReleaseRefresh('释放 至上一个分类')
+    this.refreshConfigurator?.setTxtPullUpLoad('上拉 至下一个分类')
+    this.refreshConfigurator?.setTxtReleaseLoad('释放 至下一个分类')
   }
 
   build() {
@@ -69,8 +70,7 @@ export struct ClassifyContentView {
 
       Column() {
         PullToRefresh({
-          state: this.state,
-          changeState: (state) => {
+          changeStateOutside: (state) => {
             this.state = state
           },
           refreshConfigurator: this.refreshConfigurator,
@@ -136,7 +136,7 @@ export struct ClassifyContentView {
     List({ scroller: this.rightListScroller }) {
       if (this.hasAd) {
         ListItem() {
-          Image($r('app.media.ad_img'))
+          Image($r("app.media.img_ad"))
             .height(80)
             .width('100%')
             .border({ radius: 10 })
@@ -228,11 +228,11 @@ export struct ClassifyContentView {
           })
 
         if (secondClassify.sort == 2) {
-          this.sortBuilder($r('app.media.icon_sort_up'))
+          this.sortBuilder($r("[module_base].media.ic_sort_up"))
         } else if (secondClassify.sort == 3) {
-          this.sortBuilder($r('app.media.icon_sort_down'))
+          this.sortBuilder($r("[module_base].media.ic_sort_down"))
         } else {
-          this.sortBuilder($r('app.media.icon_sort_def'))
+          this.sortBuilder($r("[module_base].media.ic_sort_def"))
         }
       }
       .height(25)

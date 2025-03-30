@@ -14,14 +14,19 @@
  */
 import { PullToRefreshConfigurator } from './MyPullToRefreshConfigurator';
 
-const IS_FREE = 0;
-const IS_PULL_DOWN_1 = 11;
-const IS_PULL_DOWN_2 = 12;
-const IS_REFRESHING = 2;
-const IS_REFRESHED = 3;
-const IS_PULL_UP_1 = 41;
-const IS_PULL_UP_2 = 42;
-const IS_LOADING = 5;
+export enum RefreshState {
+  FREE, //空闲
+  PullDownRefresh, //下拉刷新
+  ReleaseRefresh, //松开刷新
+  Refreshing, //刷新中
+  RefreshComplete, //刷新完成
+  PullUpLoad, //上拉加载
+  ReleaseLoad, //松开加载
+  Loading, //加载中
+  LoadComplete, //加载完成
+  DragToTop, //拖动到顶部（提供给外部滚动器可联动）
+  DragToBottom, //拖动到底部（提供给外部滚动器可联动）
+}
 
 /**
  * @author weioule
@@ -36,8 +41,6 @@ export struct PullToRefresh {
   @BuilderParam customList?: () => void;
   @Param mWidth?: Length = '100%';
   @Param mHeight?: Length = '100%';
-  @Param refreshEnable?: boolean = true;
-  @Param loadEnable?: boolean = true;
   @Param onRefresh?: () => Promise<string> = () => {
     return new Promise<string>((resolve, reject) => {
       setTimeout(() => {
@@ -65,13 +68,14 @@ export struct PullToRefresh {
   @Local private mHeightNumber?: number = 0;
   @Local private trYTop: number = 0;
   @Local private trYBottom?: number = 0;
-  @Param state: number = IS_FREE;
-  @Local private refreshText?: string = this.refreshConfigurator?.getRefreshTextPullUp1();
-  @Local private loadText?: ResourceStr = this.refreshConfigurator?.getLoadTextPullUp1();
+  @Local state: number = RefreshState.FREE;
+  @Local private refreshText?: string = this.refreshConfigurator?.getTxtPullDownRefresh();
+  @Local private loadText?: ResourceStr = this.refreshConfigurator?.getTxtPullUpLoad();
   @Local private angle1?: number | string = 0;
   @Local private angle2?: number | string = 180;
   @Local private angle3?: number | string = 0;
   @Local private angle4?: number | string = 0;
+  @Local private actionStart: boolean = false;
   private mWidthNumber?: number = 0;
   private touchYOld?: number = 0;
   private touchYNew?: number = 0;
@@ -80,7 +84,14 @@ export struct PullToRefresh {
   private value?: number = 0;
   private timer?: number;
   private panOption: PanGestureOptions = new PanGestureOptions({ direction: PanDirection.Up | PanDirection.Down })
-  @Event changeState: (state: number) => void
+  @Event changeStateOutside: (state: number) => void = (state) => {
+  }
+
+  changeState(state: number) {
+    this.state = state
+    //与Component组件同步状态
+    this.changeStateOutside(state)
+  }
 
   aboutToAppear() {
   }
@@ -107,6 +118,8 @@ export struct PullToRefresh {
       .height((this.mHeightNumber !== undefined ? this.mHeightNumber : 0) -
         (this.trYTop !== undefined ? this.trYTop : 0)
         + (this.trYBottom !== undefined ? this.trYBottom : 0))
+      //刷新与加载状态组件都是收起的时候才能滚动，避免滚动导致显示异常
+      .enabled(this.trYTop == 0 && this.trYBottom == 0)
 
       // 上拉加载动画部分
       Stack() {
@@ -115,8 +128,7 @@ export struct PullToRefresh {
       .width('100%')
       //始终保持显示内容的最小高度=30，icon和文本居中显示
       .height(this.trYBottom !== undefined ? -this.trYBottom + (this.trYBottom > -30 ? 30 + this.trYBottom : 0) : 0)
-      .backgroundColor(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadBackgroundColor() :
-        0)
+      .backgroundColor(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadBackgroundColor() : 0)
     }
     .width(this.mWidth === undefined ? '100%' : this.mWidth)
     .height(this.mHeight === undefined ? '100%' : this.mHeight)
@@ -127,19 +139,23 @@ export struct PullToRefresh {
     .parallelGesture(
       PanGesture(this.panOption)
         .onActionStart((event?: GestureEvent) => {
-          if (event !== undefined) {
-            this.touchYOld = event.offsetY;
+          //刷新与加载状态组件都是收起的时候处理触摸事件，避免滑动导致显示异常
+          if (event !== undefined && this.trYTop == 0 && this.trYBottom == 0) {
+            this.touchYOld = event.offsetY
+            this.actionStart = true
           }
         })
         .onActionUpdate((event?: GestureEvent) => {
-          if (event !== undefined) {
+          if (event !== undefined && this.actionStart) {
             this.onActionUpdate(event);
           }
         })
         .onActionEnd(() => {
-          this.onActionEnd();
-        })
-    )
+          if (this.actionStart) {
+            this.actionStart = false
+            this.onActionEnd();
+          }
+        }))
   }
 
   @Builder
@@ -155,27 +171,27 @@ export struct PullToRefresh {
         Row() {
           Stack() {
             Image($r('app.media.icon_up'))
-              .width(20)
-              .height(this.trYTop != undefined && this.trYTop > 0 ? 20 : 0)//高度控制，否则外层父控件隐藏的情况下也会展示
+              .width(18)
               .objectFit(ImageFit.Contain)
-              .visibility(this.state != IS_REFRESHING && this.state != IS_REFRESHED ? Visibility.Visible :
-              Visibility.Hidden)
+              .height(this.trYTop != undefined && this.trYTop > 0 ? 18 : 0)//高度控制，否则外层父控件隐藏的情况下也会展示
+              .visibility(this.state != RefreshState.Refreshing && this.state != RefreshState.RefreshComplete ?
+              Visibility.Visible : Visibility.None)
               .rotate({
                 z: 1,
                 angle: this.angle2 !== undefined ? this.angle2 : 0
               })
 
             Image($r('app.media.icon_load'))
-              .width(20)
-              .height(20)
+              .width(18)
+              .height(18)
               .objectFit(ImageFit.Contain)
-              .visibility(this.state == IS_REFRESHING ? Visibility.Visible : Visibility.Hidden)
+              .visibility(this.state == RefreshState.Refreshing ? Visibility.Visible : Visibility.None)
               .rotate({
                 z: 1,
                 angle: this.angle4 !== undefined ? this.angle4 : 0
               })
           }
-          .width(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadImgHeight() : 0)
+          .width('auto')
           .height(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadImgHeight() : 0)
 
           Text(this.refreshText)
@@ -209,35 +225,33 @@ export struct PullToRefresh {
       Row() {
         Stack() {
           Image($r('app.media.icon_up'))
-            .width(20)
-            .height(this.trYBottom != undefined && this.trYBottom < 0 ? 20 : 0)//高度控制，否则外层父控件隐藏的情况下也会展示
+            .width(18)
             .objectFit(ImageFit.Contain)
-            .visibility(this.state != IS_LOADING && this.state != IS_FREE ? Visibility.Visible : Visibility.Hidden)
+            .height(this.trYBottom != undefined && this.trYBottom < 0 ? 18 : 0)//高度控制，否则外层父控件隐藏的情况下也会展示
+            .visibility(this.state != RefreshState.Loading && this.state != RefreshState.LoadComplete ?
+            Visibility.Visible : Visibility.None)
             .rotate({
               z: 1,
               angle: this.angle1 !== undefined ? this.angle1 : 0
             })
 
           Image($r('app.media.icon_load'))
-            .width(20)
-            .height(20)
+            .width(18)
+            .height(18)
             .objectFit(ImageFit.Contain)
-            .visibility(this.state == IS_LOADING ? Visibility.Visible : Visibility.Hidden)
+            .visibility(this.state == RefreshState.Loading ? Visibility.Visible : Visibility.None)
             .rotate({
               z: 1,
               angle: this.angle3 !== undefined ? this.angle3 : 0
             })
         }
-        .width(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadImgHeight() : 0)
-        .height(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadImgHeight() : 0)
+        .width('auto')
 
         Text(this.loadText)
-          .height('100%')
           .textAlign(TextAlign.Center)
           .margin({ left: 5 })
           .fontColor(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadTextColor() : 0)
           .fontSize(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getLoadTextSize() : 0)
-          .height(this.refreshConfigurator !== undefined ? this.refreshConfigurator.getRefreshHeight() : 0)
       }
       .width('100%')
       .height('100%')
@@ -249,15 +263,17 @@ export struct PullToRefresh {
 
   private onActionUpdate(event: GestureEvent): void {
     if (this.state !== undefined && this.refreshConfigurator !== undefined && this.touchYOld !== undefined) {
-      if (this.state == IS_FREE ||
-        this.state == IS_PULL_DOWN_1 || this.state == IS_PULL_DOWN_2 ||
-        this.state == IS_PULL_UP_1 || this.state == IS_PULL_UP_2) {
+      if (this.state == RefreshState.FREE ||
+        this.state == RefreshState.PullDownRefresh || this.state == RefreshState.ReleaseRefresh ||
+        this.state == RefreshState.PullUpLoad || this.state == RefreshState.ReleaseLoad ||
+        this.state == RefreshState.DragToTop || this.state == RefreshState.DragToBottom) {
         let maxTranslate = this.refreshConfigurator.getMaxTranslate()
         let loadImgHeight = this.refreshConfigurator.getLoadImgHeight()
         let refreshHeight = this.refreshConfigurator.getRefreshHeight()
         if (!this.scroller.currentOffset()) {
           return;
         }
+
         this.touchYNew = event.offsetY;
 
         // 当前手势是否下拉
@@ -271,9 +287,10 @@ export struct PullToRefresh {
           isTop = true;
         }
 
-        if ((this.state == IS_FREE && isTop && isPullAction) || // 处于自由状态且列表处于顶部位置 并且 当前手势是下拉手势
-          this.state == IS_PULL_DOWN_1 || this.state == IS_PULL_DOWN_2) { // 处于下拉状态中
-          if (this.refreshEnable == true) {
+        if ((this.state == RefreshState.FREE && isTop && isPullAction) || // 处于自由状态且列表处于顶部位置 并且 当前手势是下拉手势
+          this.state == RefreshState.PullDownRefresh || this.state == RefreshState.ReleaseRefresh ||
+          this.state == RefreshState.DragToTop) { // 处于下拉状态中
+          if (this.refreshConfigurator.getHasRefresh() == true) {
             if (this.touchYOld !== undefined && refreshHeight !== undefined) {
               // 获取最新位移距离
               let trY = this.touchYNew - this.touchYOld;
@@ -285,65 +302,79 @@ export struct PullToRefresh {
 
               // 计算当前需要位移的总距离
               this.trYTop = this.getTranslateYOfRefresh(trY);
-              if (this.trYTop < refreshHeight) {
-                this.changeState(IS_PULL_DOWN_1);
+              if (this.trYTop != 0) {
+                if (this.trYTop < refreshHeight) {
+                  this.changeState(RefreshState.PullDownRefresh);
+                } else {
+                  this.changeState(RefreshState.ReleaseRefresh);
+                }
+                // 如果没有自定义刷新动画，就执行内置动画下拉时的逻辑
+                if (!this.customRefresh && maxTranslate !== undefined) {
+                  this.drawRefreshView(true, this.trYTop / maxTranslate);
+                }
+                // 如果有下拉中动画回调，就执行下拉中动画回调
+                if (this.onAnimPullDown && maxTranslate !== undefined) {
+                  this.onAnimPullDown(this.trYTop / maxTranslate, this.mWidthNumber, this.trYTop);
+                }
               } else {
-                this.changeState(IS_PULL_DOWN_2);
-              }
-              // 如果没有自定义刷新动画，就执行内置动画下拉时的逻辑
-              if (!this.customRefresh && maxTranslate !== undefined) {
-                this.drawRefreshView(true, this.trYTop / maxTranslate);
-              }
-              // 如果有下拉中动画回调，就执行下拉中动画回调
-              if (this.onAnimPullDown && maxTranslate !== undefined) {
-                this.onAnimPullDown(this.trYTop / maxTranslate, this.mWidthNumber, this.trYTop);
+                this.changeState(RefreshState.DragToTop)
               }
             }
           }
-        } else if (this.loadEnable) {
+        } else if (this.refreshConfigurator.getHasLoadMore()) {
           this.listOffsetNew = this.scroller.currentOffset().yOffset;
           // 列表处于底部位置且上滑时，2.已上滑时
           try {
             if (this.touchYOld !== undefined) {
               //注释掉this.listOffsetOld != 0，支持内容不满一屏时也可以上拉
-              if ((this.state == IS_FREE && this.listOffsetOld == this.listOffsetNew && /*this.listOffsetOld != 0 &&*/
-                this.touchYNew < this.touchYOld && this.scroller.isAtEnd()) ||
-                this.state == IS_PULL_UP_1 || this.state == IS_PULL_UP_2) {
+              if ((this.state == RefreshState.FREE &&
+                this.listOffsetOld == this.listOffsetNew && /*this.listOffsetOld != 0 &&*/
+                this.touchYNew < this.touchYOld && this.scroller.isAtEnd()) || this.state == RefreshState.PullUpLoad ||
+                this.state == RefreshState.ReleaseLoad || this.state == RefreshState.DragToBottom) {
                 // 获取最新的位移距离
                 let trY = this.touchYNew - this.touchYOld;
                 // 计算当前需要位移的总距离
                 this.trYBottom = this.getTranslateYOfLoadMore(trY);
-                if (loadImgHeight !== undefined && this.trYBottom > -loadImgHeight) {
-                  this.changeState(IS_PULL_UP_1);
-                } else {
-                  this.changeState(IS_PULL_UP_2);
-                }
-                // 如果没有自定义加载更多动画，就执行内置动画上拉时的逻辑
-                if (!this.customLoad && maxTranslate !== undefined) {
-                  this.drawLoadView(true, -this.trYBottom / maxTranslate);
-                }
-                // 如果有上拉中动画回调，就执行上拉中动画回调
-                if (this.onAnimPullUp) {
-                  if (this.trYBottom !== undefined && maxTranslate !== undefined) {
-                    this.onAnimPullUp(-this.trYBottom / maxTranslate, this.mWidthNumber, -this.trYBottom);
+                if (this.trYBottom != 0) {
+                  if (loadImgHeight !== undefined && this.trYBottom > -loadImgHeight) {
+                    this.changeState(RefreshState.PullUpLoad);
+                  } else {
+                    this.changeState(RefreshState.ReleaseLoad);
                   }
+                  // 如果没有自定义加载更多动画，就执行内置动画上拉时的逻辑
+                  if (!this.customLoad && maxTranslate !== undefined) {
+                    this.drawLoadView(true, -this.trYBottom / maxTranslate);
+                  }
+                  // 如果有上拉中动画回调，就执行上拉中动画回调
+                  if (this.onAnimPullUp) {
+                    if (this.trYBottom !== undefined && maxTranslate !== undefined) {
+                      this.onAnimPullUp(-this.trYBottom / maxTranslate, this.mWidthNumber, -this.trYBottom);
+                    }
+                  }
+                } else {
+                  this.changeState(RefreshState.DragToBottom)
                 }
               }
             }
           } catch (error) {
             if (this.touchYOld !== undefined) {
-              if ((this.state == IS_FREE && this.listOffsetOld == this.listOffsetNew /*&& this.listOffsetOld != 0*/ &&
-                this.touchYNew < this.touchYOld) ||
-                this.state == IS_PULL_UP_1 || this.state == IS_PULL_UP_2) {
+              if ((this.state == RefreshState.FREE &&
+                this.listOffsetOld == this.listOffsetNew /*&& this.listOffsetOld != 0*/ &&
+                this.touchYNew < this.touchYOld) || this.state == RefreshState.PullUpLoad ||
+                this.state == RefreshState.ReleaseLoad || this.state == RefreshState.DragToBottom) {
                 if (this.touchYNew !== undefined && this.touchYOld !== undefined && loadImgHeight !== undefined) {
                   // 获取最新的位移距离
                   let trY = this.touchYNew - this.touchYOld;
                   // 计算当前需要位移的总距离
                   this.trYBottom = this.getTranslateYOfLoadMore(trY);
-                  if (this.trYBottom > -loadImgHeight) {
-                    this.changeState(IS_PULL_UP_1);
+                  if (this.trYBottom != 0) {
+                    if (this.trYBottom > -loadImgHeight) {
+                      this.changeState(RefreshState.PullUpLoad);
+                    } else {
+                      this.changeState(RefreshState.ReleaseLoad);
+                    }
                   } else {
-                    this.changeState(IS_PULL_UP_2);
+                    this.changeState(RefreshState.DragToBottom)
                   }
                 }
               }
@@ -358,14 +389,18 @@ export struct PullToRefresh {
 
   private onActionEnd(): void {
     if (this.refreshConfigurator !== undefined) {
+      if (this.state == RefreshState.DragToTop || this.state == RefreshState.DragToBottom) {
+        this.changeState(RefreshState.FREE);
+        return
+      }
       let maxTranslate = this.refreshConfigurator.getMaxTranslate()
       let refreshAnimDuration = this.refreshConfigurator.getRefreshAnimDuration();
       if (this.refreshConfigurator.getListIsPlacement()) {
         if (this.state !== undefined) {
-          if (this.state == IS_PULL_DOWN_1 || this.state == IS_PULL_DOWN_2) {
+          if (this.state == RefreshState.PullDownRefresh || this.state == RefreshState.ReleaseRefresh) {
             // 让列表归位到顶部
             this.scroller.scrollEdge(Edge.Top);
-          } else if (this.state == IS_PULL_UP_1 || this.state == IS_PULL_UP_2) {
+          } else if (this.state == RefreshState.PullUpLoad || this.state == RefreshState.ReleaseLoad) {
             // 让列表归位到底部
             this.scroller.scrollEdge(Edge.Bottom);
           }
@@ -374,11 +409,12 @@ export struct PullToRefresh {
       if (this.trYTop !== undefined) {
         if (this.trYTop > 0) { // 下拉结束
           if (this.state !== undefined && maxTranslate !== undefined) {
-            if (this.state == IS_FREE || this.state == IS_PULL_DOWN_1 || this.state == IS_PULL_DOWN_2) {
+            if (this.state == RefreshState.FREE || this.state == RefreshState.PullDownRefresh ||
+              this.state == RefreshState.ReleaseRefresh) {
               if (this.trYTop / maxTranslate < 0.7) {
                 this.closeRefresh();
               } else {
-                this.changeState(IS_REFRESHING);
+                this.changeState(RefreshState.Refreshing);
                 //抬手后回弹
                 animateTo({ duration: 150 * (this.trYTop / maxTranslate) }, () => {
                   this.trYTop = maxTranslate!! * 0.7;
@@ -406,27 +442,24 @@ export struct PullToRefresh {
                     this.onAnimRefreshing(this.value, this.mWidthNumber, this.trYTop);
                   }
                 }, 10);
+
                 if (this.onRefresh !== undefined) {
                   this.onRefresh().then((refreshText) => {
-                    //停止刷新中动画
                     setTimeout(() => {
                       if (refreshText.length == 0) {
-                        this.closeRefresh();
-                      } else {
-                        //停止加载中动画
-                        clearInterval(this.timer);
-                        this.changeState(IS_REFRESHED);
-
-                        if (!this.customRefresh) {
-                          //显示刷新结果文案
-                          this.refreshText = refreshText;
-                        }
-                        setTimeout(() => {
-                          //定时结束刷新，用于期间显示刷新结果提示文案
-                          this.closeRefresh();
-                        }, this.refreshConfigurator?.getRefreshCompleteTextHoldTime());
+                        this.refreshText = this.refreshConfigurator?.getTxtRefreshComplete();
+                      } else if (!this.customRefresh) {
+                        //显示刷新结果文案
+                        this.refreshText = refreshText;
                       }
-                    }, this.refreshText == this.refreshConfigurator?.getRefreshTextLoading() ? 0 : 300)
+                      //停止刷新中动画
+                      clearInterval(this.timer);
+                      this.changeState(RefreshState.RefreshComplete);
+                      setTimeout(() => {
+                        //定时结束刷新，用于期间显示刷新结果提示文案
+                        this.closeRefresh();
+                      }, this.refreshConfigurator?.getRefreshCompleteTextHoldTime());
+                    }, this.refreshText == this.refreshConfigurator?.getTxtRefreshing() ? 0 : 300)
                   });
                 }
               }
@@ -434,11 +467,12 @@ export struct PullToRefresh {
           }
         } else if (this.trYBottom !== undefined && this.trYBottom < 0) { // 上拉结束
           if (this.state !== undefined && maxTranslate !== undefined) {
-            if (this.state == IS_FREE || this.state == IS_PULL_UP_1 || this.state == IS_PULL_UP_2) {
+            if (this.state == RefreshState.FREE || this.state == RefreshState.PullUpLoad ||
+              this.state == RefreshState.ReleaseLoad) {
               if (-this.trYBottom / maxTranslate < 0.7) {
                 this.closeLoad();
               } else {
-                this.changeState(IS_LOADING);
+                this.changeState(RefreshState.Loading);
                 //抬手后回弹
                 animateTo({ duration: 150 * (-this.trYBottom / maxTranslate) }, () => {
                   this.trYBottom = -maxTranslate!! * 0.7;
@@ -468,30 +502,28 @@ export struct PullToRefresh {
 
                 if (this.onLoadMore !== undefined) {
                   this.onLoadMore().then((loadText) => {
-                    //停止加载中动画
                     setTimeout(() => {
                       if (loadText.length == 0) {
-                        this.closeLoad();
-                      } else {
-                        //停止加载中动画
-                        clearInterval(this.timer);
-                        this.changeState(IS_FREE);
-                        if (!this.customLoad) {
-                          //更新提示文案
-                          this.loadText = loadText;
-                        }
-                        setTimeout(() => {
-                          this.closeLoad();
-                        }, this.refreshConfigurator?.getRefreshCompleteTextHoldTime());
+                        this.loadText = this.refreshConfigurator?.getTxtLoadComplete()
+                      } else if (!this.customLoad) {
+                        //更新提示文案
+                        this.loadText = loadText;
                       }
-                    }, this.refreshText == this.refreshConfigurator?.getRefreshTextLoading() ? 0 : 300)
+
+                      //停止加载中动画
+                      clearInterval(this.timer);
+                      this.changeState(RefreshState.LoadComplete);
+                      setTimeout(() => {
+                        this.closeLoad();
+                      }, this.refreshConfigurator?.getRefreshCompleteTextHoldTime());
+                    }, this.refreshText == this.refreshConfigurator?.getTxtLoading() ? 0 : 300)
                   });
                 }
               }
             }
           }
         } else {
-          this.changeState(IS_FREE);
+          this.changeState(RefreshState.FREE);
         }
       }
     }
@@ -503,15 +535,15 @@ export struct PullToRefresh {
         let refreshHeight = this.refreshConfigurator.getRefreshHeight()
         if (refreshHeight !== undefined && this.trYTop >= refreshHeight) {
           value = value >= 0.7 ? 0.7 : value;
-          this.refreshText = value >= 0.7 ? this.refreshConfigurator?.getRefreshTextPullUp2() :
-          this.refreshConfigurator?.getRefreshTextPullUp1()
+          this.refreshText = value >= 0.7 ? this.refreshConfigurator?.getTxtPullDownRefresh() :
+          this.refreshConfigurator?.getTxtReleaseRefresh()
           this.angle2 = value >= 0.7 ? 0 : 180
         }
       }
     } else {
       this.angle4 = value * 360;
-      if (this.refreshConfigurator !== undefined && this.state == IS_REFRESHING) {
-        this.refreshText = this.refreshConfigurator?.getRefreshTextLoading()
+      if (this.refreshConfigurator !== undefined && this.state == RefreshState.Refreshing) {
+        this.refreshText = this.refreshConfigurator?.getTxtRefreshing()
       }
     }
   }
@@ -525,12 +557,12 @@ export struct PullToRefresh {
             if (value < 0.7) {
               this.angle1 = 0;
               if (this.refreshConfigurator !== undefined) {
-                this.loadText = this.refreshConfigurator?.getLoadTextPullUp1();
+                this.loadText = this.refreshConfigurator?.getTxtPullUpLoad();
               }
             } else {
               this.angle1 = 180;
               if (this.refreshConfigurator !== undefined) {
-                this.loadText = this.refreshConfigurator?.getLoadTextPullUp2();
+                this.loadText = this.refreshConfigurator?.getTxtReleaseLoad();
               }
             }
           }
@@ -538,8 +570,8 @@ export struct PullToRefresh {
       }
     } else {
       this.angle3 = value * 360;
-      if (this.refreshConfigurator !== undefined && this.state == IS_LOADING) {
-        this.loadText = this.refreshConfigurator?.getLoadTextLoading();
+      if (this.refreshConfigurator !== undefined && this.state == RefreshState.Loading) {
+        this.loadText = this.refreshConfigurator?.getTxtLoading();
         ;
       }
     }
@@ -556,12 +588,11 @@ export struct PullToRefresh {
         }
       } else {
         clearInterval(this.timer);
-        this.changeState(IS_FREE);
+        this.changeState(RefreshState.FREE);
         this.trYTop = 0;
         this.angle2 = 180;
         this.angle4 = 0;
-        this.refreshText = this.refreshConfigurator?.getRefreshTextPullUp1();
-        ;
+        this.refreshText = this.refreshConfigurator?.getTxtPullDownRefresh();
       }
     }, 5);
   }
@@ -577,11 +608,11 @@ export struct PullToRefresh {
         }
       } else {
         clearInterval(this.timer);
-        this.changeState(IS_FREE);
+        this.changeState(RefreshState.FREE);
         this.trYBottom = 0;
         this.angle1 = 0;
         this.angle3 = 0;
-        this.loadText = this.refreshConfigurator?.getLoadTextPullUp1();
+        this.loadText = this.refreshConfigurator?.getTxtPullUpLoad();
       }
     }, 5);
   }

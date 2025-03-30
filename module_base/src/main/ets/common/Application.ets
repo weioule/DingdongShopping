@@ -3,6 +3,7 @@ import display from '@ohos.display';
 import deviceInfo from '@ohos.deviceInfo';
 import bundleManager from '@ohos.bundle.bundleManager';
 import { PullToRefreshConfigurator } from '../refresh/MyPullToRefreshConfigurator';
+import PreferencesUtils from '../utils/PreferencesUtils';
 
 /**
  * @author weioule
@@ -43,6 +44,9 @@ export namespace MyApp {
           AppUtil.appId = bundleInfo.signatureInfo.appId;
           AppUtil.appIdentifier = bundleInfo.signatureInfo.appIdentifier;
         });
+
+      // 初始化preference
+      PreferencesUtils.loadPreferences(context, AppUtil.bundleName)
     }
   }
 
@@ -108,6 +112,7 @@ export namespace MyApp {
       configurator.setHasRefresh(true);
       configurator.setHasLoadMore(false);
       configurator.setRefreshHeight(Refresh.height);
+      configurator.setRefreshBackgroundColor($r('app.color.white'));
       configurator.setRefreshContentBgColor($r('app.color.white'));
       configurator.setRefreshTextColor($r('app.color.txt_color_999'));
       configurator.setLoadContentBgColor($r('app.color.white'));
@@ -127,6 +132,7 @@ export namespace MyApp {
   export class Module {
     static readonly module_classify: string = 'module_classify';
     static readonly module_search: string = 'module_search';
+    static readonly module_shopping_cart: string = 'module_shopping_cart';
   }
 
 
@@ -135,7 +141,9 @@ export namespace MyApp {
     static readonly classifyPage: string = 'pages/ClassifyPage';
     static readonly commodityDetailPage: string = 'pages/CommodityDetailPage';
     //SearchModule
-    static readonly searchCommodityPage: string = 'pages/SearchCommodityPage';
-    static readonly searchCommodityListPage: string = 'pages/SearchCommodityListPage';
+    static readonly popularSearchesPage: string = 'pages/PopularSearchesPage';
+    static readonly searchListPage: string = 'pages/SearchListPage';
+    //CartModule
+    static readonly shoppingCartPage: string = 'pages/ShoppingCartPage';
   }
 }

@@ -1,11 +1,10 @@
+import { MyApp } from "../common/Application";
+
 /**
  * @author weioule
  * @date 2025-02-02
  * 加购物车按钮
  */
-import { MyApp } from 'module_base/src/main/ets/common/Application';
-import { ToastUtil } from 'module_base/src/main/ets/utils/ToastUtil';
-
 @Component
 export struct AddCartButtonView {
   @Prop cartNum: number = 0;
@@ -26,8 +25,8 @@ export struct AddCartButtonView {
           .linearGradient({
             angle: 90,
             colors: [
-              ['#009436', 0.0],
-              ['#6ece3a', 1.0],
+              ['#01c335', 0.0],
+              ['#019c2a', 1.0],
             ]
           })
       } else {
@@ -45,14 +44,14 @@ export struct AddCartButtonView {
       Text((this.cartNum > 99) ? "99+" : `${this.cartNum}`)
         .height(13)
         .width('auto')
-        .borderRadius(6)
+        .borderRadius(10)
         .margin({ left: -10 })
         .fontColor(Color.White)
         .textAlign(TextAlign.Center)
-        .fontSize(MyApp.Font.smallTextSize)
         .constraintSize({ minWidth: 13 })
+        .fontSize(MyApp.Font.smallTextSize)
         .minFontSize(MyApp.Font.minimumTextSize)
-        .backgroundColor($r('[module_base].color.red_color'))
+        .backgroundColor($r('app.color.red_color'))
         .visibility(this.cartNum > 0 ? Visibility.Visible : Visibility.None)
         .padding({
           top: 1,
@@ -70,8 +69,7 @@ export struct AddCartButtonView {
     .height(30)
     .margin({ bottom: 4 })
     .onClick(() => {
-      this.cartNum ++
-      //ToastUtil.show('加购成功')
+      this.cartNum++
     })
   }
 }

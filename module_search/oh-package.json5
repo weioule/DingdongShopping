@@ -7,5 +7,7 @@
   "license": "Apache-2.0",
   "packageType": "InterfaceHar",
   "dependencies": {
+    "module_base": "file:../module_base",
+    "module_shopping_cart": "file:../module_shopping_cart"
   }
 }

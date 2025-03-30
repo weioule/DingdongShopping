@@ -23,7 +23,7 @@ export class PullToRefreshConfigurator {
   private hasRefresh?: boolean = true; // 是否具有下拉刷新功能
   private hasLoadMore?: boolean = true; // 是否具有上拉加载功能
   private maxTranslate?: number = 100; // 可下拉上拉的最大距离
-  private sensitivity?: number = 0.7; // 下拉上拉灵敏度
+  private sensitivity?: number = 1; // 下拉上拉灵敏度
   private listIsPlacement?: boolean = true; // 滑动结束后列表是否归位
   private animDuration?: number = 150; // 滑动结束后，回弹动画执行时间
   private refreshHeight?: number = 30; // 下拉动画高度
@@ -32,18 +32,20 @@ export class PullToRefreshConfigurator {
   private refreshTextColor?: ResourceColor = '#999999'; // 下拉加载完毕后提示文本的字体颜色
   private refreshTextSize?: number | string | Resource = 18; // 下拉加载完毕后提示文本的字体大小
   private refreshAnimDuration?: number = 1000; // 下拉动画执行一次的时间
-  private refreshCompleteTextHoldTime?: number = 700; //下拉刷新完毕后, 刷新成功文本停留的时间
+  private refreshCompleteTextHoldTime?: number = 500; //下拉刷新完毕后, 刷新成功文本停留的时间
   private loadImgHeight?: number = 30; // 上拉图片高度
   private loadBackgroundColor?: ResourceColor = 'rgba(0,0,0,0)'; // 上拉动画区域背景色
   private loadContentBgColor?: ResourceColor = '#F0F0F0'; // 上拉内容区域背景色
   private loadTextColor?: ResourceColor = '#999999'; // 上拉文本的字体颜色
   private loadTextSize?: number | string | Resource = 18; // 上拉文本的字体大小
-  private refreshTextPullUp1?: string = '下拉刷新...'; // 上拉1阶段文本
-  private refreshTextPullUp2?: string = '释放刷新'; // 上拉2阶段文本
-  private refreshTextLoading?: string = '正在加载中...'; // 上拉加载更多中时的文本
-  private loadTextPullUp1?: string = '上拉刷新...'; // 上拉1阶段文本
-  private loadTextPullUp2?: string = '释放刷新'; // 上拉2阶段文本
-  private loadTextLoading?: string = '正在加载中...'; // 上拉加载更多中时的文本
+  private txtPullDownRefresh?: string = '下拉可以刷新'; // 下拉1阶段文本
+  private txtReleaseRefresh?: string = '释放立即刷新'; // 下拉2阶段文本
+  private txtRefreshing?: string = '正在刷新...'; // 下拉刷新中时的文本
+  private txtRefreshComplete?: string = '刷新完成'; // 下拉刷新完成时的文本
+  private txtPullUpLoad?: string = '上拉可以加载'; // 上拉1阶段文本
+  private txtReleaseLoad?: string = '释放立即加载'; // 上拉2阶段文本
+  private txtLoading?: string = '正在加载...'; // 上拉加载更多中时的文本
+  private txtLoadComplete?: string = '加载完成'; // 上拉加载更多完成时的文本
 
   setHasRefresh(hasRefresh: boolean) {
     this.hasRefresh = hasRefresh;
@@ -105,7 +107,7 @@ export class PullToRefreshConfigurator {
   }
 
   getRefreshCompleteTextHoldTime(): number {
-    return this.refreshCompleteTextHoldTime !== undefined ? this.refreshCompleteTextHoldTime : 700;
+    return this.refreshCompleteTextHoldTime !== undefined ? this.refreshCompleteTextHoldTime : 300;
   }
 
   getRefreshWidth(): number {
@@ -226,57 +228,75 @@ export class PullToRefreshConfigurator {
     return 0;
   }
 
-  setRefreshTextPullUp1(refreshTextPullUp1: string) {
-    this.refreshTextPullUp1 = refreshTextPullUp1;
+  setTxtPullDownRefresh(txtPullDownRefresh: string) {
+    this.txtPullDownRefresh = txtPullDownRefresh;
     return this;
   }
 
-  getRefreshTextPullUp1() {
-    return this.refreshTextPullUp1;
+  getTxtPullDownRefresh() {
+    return this.txtPullDownRefresh;
   }
 
-  setRefreshTextPullUp2(refreshTextPullUp2: string) {
-    this.refreshTextPullUp2 = refreshTextPullUp2;
+  setTxtReleaseRefresh(txtReleaseRefresh: string) {
+    this.txtReleaseRefresh = txtReleaseRefresh;
     return this;
   }
 
-  getRefreshTextPullUp2() {
-    return this.refreshTextPullUp2;
+  getTxtReleaseRefresh() {
+    return this.txtReleaseRefresh;
   }
 
-  setRefreshTextLoading(refreshTextLoading: string) {
-    this.refreshTextLoading = refreshTextLoading;
+  setTxtRefreshing(txtRefreshing: string) {
+    this.txtRefreshing = txtRefreshing;
     return this;
   }
 
-  getRefreshTextLoading(): string {
-    return this.refreshTextLoading !== undefined ? this.refreshTextLoading : "";
+  getTxtRefreshing(): string {
+    return this.txtRefreshing !== undefined ? this.txtRefreshing : "";
   }
 
-  setLoadTextPullUp1(loadTextPullUp1: string) {
-    this.loadTextPullUp1 = loadTextPullUp1;
+  setTxtRefreshComplete(txtRefreshComplete: string) {
+    this.txtRefreshComplete = txtRefreshComplete;
     return this;
   }
 
-  getLoadTextPullUp1() {
-    return this.loadTextPullUp1;
+  getTxtRefreshComplete(): string {
+    return this.txtRefreshComplete !== undefined ? this.txtRefreshComplete : "";
   }
 
-  setLoadTextPullUp2(loadTextPullUp2: string) {
-    this.loadTextPullUp2 = loadTextPullUp2;
+  setTxtPullUpLoad(txtPullUpLoad: string) {
+    this.txtPullUpLoad = txtPullUpLoad;
     return this;
   }
 
-  getLoadTextPullUp2() {
-    return this.loadTextPullUp2;
+  getTxtPullUpLoad() {
+    return this.txtPullUpLoad;
   }
 
-  setLoadTextLoading(loadTextLoading: string) {
-    this.loadTextLoading = loadTextLoading;
+  setTxtReleaseLoad(txtReleaseLoad: string) {
+    this.txtReleaseLoad = txtReleaseLoad;
     return this;
   }
 
-  getLoadTextLoading(): string {
-    return this.loadTextLoading !== undefined ? this.loadTextLoading : "";
+  getTxtReleaseLoad() {
+    return this.txtReleaseLoad;
+  }
+
+  setTxtLoading(txtLoading: string) {
+    this.txtLoading = txtLoading;
+    return this;
+  }
+
+  getTxtLoading(): string {
+    return this.txtLoading !== undefined ? this.txtLoading : "";
+  }
+
+  setTxtLoadComplete(txtLoadComplete: string) {
+    this.txtLoadComplete = txtLoadComplete;
+    return this;
+  }
+
+  getTxtLoadComplete(): string {
+    return this.txtLoadComplete !== undefined ? this.txtLoadComplete : "";
   }
 }

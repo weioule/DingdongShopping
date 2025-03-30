@@ -9,6 +9,7 @@
     "module_base": "file:../module_base",
     "module_home": "file:../module_home",
     "module_user": "file:../module_user",
+    "module_search": "file:../module_search",
     "module_classify": "file:../module_classify",
     "module_shopping_cart": "file:../module_shopping_cart"
   }

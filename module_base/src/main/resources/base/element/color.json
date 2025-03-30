@@ -2,7 +2,11 @@
   "color": [
     {
       "name": "bg_color",
-      "value": "#F0F0F0"
+      "value": "#f4f5f4"
+    },
+    {
+      "name": "white_f6",
+      "value": "#f6f6f6"
     },
     {
       "name": "white",
@@ -10,7 +14,7 @@
     },
     {
       "name": "theme_color",
-      "value": "#009436"
+      "value": "#01c335"
     },
     {
       "name": "green_color",
@@ -42,7 +46,7 @@
     },
     {
       "name": "line_gray",
-      "value": "#F0F0F0"
+      "value": "#e7e7e7"
     }
   ]
 }

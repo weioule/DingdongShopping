@@ -3,7 +3,7 @@
  * @date 2025-02-02
  * 价格显示
  */
-import { MoneyUtils } from 'module_base/src/main/ets/utils/MoneyUtils';
+import { MoneyUtils } from '../utils/MoneyUtils';
 
 @Component
 export struct PriceView {
@@ -19,8 +19,8 @@ export struct PriceView {
   build() {
     Row() {
       Text('¥')
+        .fontColor($r('app.color.red_color'))
         .fontSize(this.fontSize)
-        .fontColor($r('[module_base].color.red_color'))
         .padding({ bottom: this.fontSizeBig > 17 ? 3 : 2 })
         .alignRules({
           bottom: { anchor: 'price', align: VerticalAlign.Bottom },
@@ -32,7 +32,7 @@ export struct PriceView {
         .maxLines(1)
         .id('price')
         .fontSize(this.fontSizeBig)
-        .fontColor($r('[module_base].color.red_color'))
+        .fontColor($r('app.color.red_color'))
         .alignRules({
           top: { anchor: '__container__', align: VerticalAlign.Top },
         })
@@ -42,7 +42,7 @@ export struct PriceView {
         .maxLines(1)
         .id('price_decimal')
         .fontSize(this.fontSize)
-        .fontColor($r('[module_base].color.red_color'))
+        .fontColor($r('app.color.red_color'))
         .padding({ bottom: this.fontSizeBig > 17 ? 3 : 2 })
         .alignRules({
           bottom: { anchor: 'price', align: VerticalAlign.Bottom },
@@ -55,20 +55,20 @@ export struct PriceView {
           .id('oldPrice')
           .fontSize(this.fontSize)
           .margin({ left: this.oldPriceLeftMargin })
-          .fontColor($r('[module_base].color.txt_color_999'))
+          .fontColor($r('app.color.txt_color_999'))
           .padding({ bottom: this.fontSizeBig > 17 ? 3 : 2 })
           .alignRules({
             left: { anchor: 'price_decimal', align: HorizontalAlign.End },
             bottom: { anchor: 'price', align: VerticalAlign.Bottom }
           })
           .decoration({
-            color: $r('[module_base].color.txt_color_999'),
+            color: $r('app.color.txt_color_999'),
             type: TextDecorationType.LineThrough
           })
       }
     }
-    .alignItems(VerticalAlign.Bottom)
-    .justifyContent(FlexAlign.Start)
     .width('100%')
+    .justifyContent(FlexAlign.Start)
+    .alignItems(VerticalAlign.Bottom)
   }
 }

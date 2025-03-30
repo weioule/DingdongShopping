@@ -1,7 +1,8 @@
+import { AddCartButtonView } from 'module_base/src/main/ets/view/AddCartButtonView';
 import { AppRouter } from 'module_base/src/main/ets/common/AppRouter';
-import { Commodity } from '../bean/ClassifyBean';
-import { AddCartButtonView } from './AddCartButtonView';
-import { PriceView } from './PriceView';
+import { Commodity } from 'module_base/src/main/ets/bean/ClassifyBean';
+import { PriceView } from 'module_base/src/main/ets/view/PriceView';
+import { RefreshState } from 'module_base/src/main/ets/refresh/MyPullToRefresh';
 
 /**
  * @author weioule
@@ -67,8 +68,8 @@ export struct ClassifyCommodityItem {
         .margin({ left: 5 })
       }
       .onClick(() => {
-        if (this.state == 0) {
-          //解决当内容不满一屏上拉、下拉抬手时偶现触发点击事件的问题
+        if (this.state == RefreshState.FREE) {
+          //解决当内容不满一屏在子条目区域内上拉、下拉抬手时触发点击事件的问题
           AppRouter.toCommodityDetailPage(this.commodity.commodityId);
         }
       })

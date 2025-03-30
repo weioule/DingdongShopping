@@ -1,4 +1,4 @@
-import { Classify } from '../bean/ClassifyBean';
+import { Classify } from "module_base/src/main/ets/bean/ClassifyBean";
 
 /**
  * @author weioule

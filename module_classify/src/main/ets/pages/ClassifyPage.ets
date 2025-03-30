@@ -1,10 +1,11 @@
-import { Classify } from '../bean/ClassifyBean';
+import { Classify } from 'module_base/src/main/ets/bean/ClassifyBean';
 import { SearchInput } from '../view/SearchInput';
 import { emitter, systemDateTime } from '@kit.BasicServicesKit';
 import { ClassifyModel } from '../model/ClassifyModel';
 import { ClassifyContentView } from '../view/ClassifyContentView';
 import { StateLayout, StateType } from 'module_base/src/main/ets/view/Statelayout';
 import { MyApp } from 'module_base/src/main/ets/common/Application';
+import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
 
 /**
  * @author weioule
@@ -14,20 +15,22 @@ import { MyApp } from 'module_base/src/main/ets/common/Application';
 @Entry
 @Component
 export struct ClassifyPage {
-  private viewModel: ClassifyModel = new ClassifyModel();
-  @State firstClassify: Array<Classify> = new Array;
-  private controller: TabsController = new TabsController()
-  private listScroller: Scroller = new Scroller();
-  @State currentFirstClassifyIndex: number = 0;
-  @State currentFirstClassifyId: string = '';
-  @State firstStateLayout: StateType = StateType.normal
-  @Prop @Watch('customShow') classifyShow: boolean
   private classifyRefreshTime: number = 0
+  private listScroller: Scroller = new Scroller();
+  private viewModel: ClassifyModel = new ClassifyModel();
+  private controller: TabsController = new TabsController()
+
   @State gridHeight: number = 0
-  @State moveGridHeight: number = 0
-  @State gridColumnCount: string = ''
   @State isOpen: boolean = false
   @State firstInit: boolean = true
+  @State moveGridHeight: number = 0
+  @State gridColumnCount: string = ''
+  @State currentFirstClassifyId: string = '';
+  @State currentFirstClassifyIndex: number = 0;
+  @Prop @Watch('customShow') classifyShow: boolean
+  @State popularSearches: PopularSearchesBean[] = []
+  @State firstClassify: Array<Classify> = new Array;
+  @State firstStateLayout: StateType = StateType.normal
 
   refreshGridHeight() {
     if (this.firstClassify?.length > 0) {
@@ -105,21 +108,26 @@ export struct ClassifyPage {
 
       if (this.firstInit) {
         this.firstInit = false
-        setTimeout(()=>{
+        setTimeout(() => {
           this.openDialog()
-        },400)
+        }, 400)
       }
     }).catch((e: string) => {
       this.firstStateLayout = StateType.error
+    })
+
+    this.viewModel.getPopularSearches().then((list: PopularSearchesBean[]) => {
+      this.popularSearches = list
     })
   }
 
   build() {
     RelativeContainer() {
       Column() {
-        SearchInput()
+        SearchInput({ popularSearches: this.popularSearches })
       }
       .width('100%')
+      .id('search_input')
       .height(45 + MyApp.Size.statusBar)
       .justifyContent(FlexAlign.Center)
       .linearGradient({
@@ -134,7 +142,6 @@ export struct ClassifyPage {
         right: 16,
         top: MyApp.Size.statusBar,
       })
-      .id('search_input')
 
       RelativeContainer() {
         Row() {
@@ -144,10 +151,10 @@ export struct ClassifyPage {
             }, (item: Classify, index: number) => JSON.stringify(item) + index)
           }
           .height(85)
-          .listDirection(Axis.Horizontal)
-          .scrollBar(BarState.Off)
           .friction(0.6)
           .layoutWeight(1)
+          .scrollBar(BarState.Off)
+          .listDirection(Axis.Horizontal)
 
           Row() {
             Image($r("app.media.ic_white_shade"))
@@ -162,9 +169,9 @@ export struct ClassifyPage {
                 .textAlign(TextAlign.Center)
 
               Image($r('app.media.ic_unfold'))
-                .margin({ top: 3 })
                 .width(18)
                 .height(18)
+                .margin({ top: 3 })
             }.layoutWeight(1)
             .justifyContent(FlexAlign.Center)
           }.height(70)
@@ -174,8 +181,8 @@ export struct ClassifyPage {
           })
         }
         .height(85)
-        .width('100%')
         .id('tabs')
+        .width('100%')
         .alignRules({
           top: { anchor: '__container__', align: VerticalAlign.Top },
         })
@@ -201,16 +208,16 @@ export struct ClassifyPage {
         .onAnimationStart((index: number, targetIndex: number) => {
           this.listScroller.scrollToIndex(targetIndex, true, ScrollAlign.CENTER);
         })
+        .barHeight(0)
+        .width('100%')
+        .layoutWeight(1)
         .vertical(false)
         .scrollable(true)
         .barMode(BarMode.Scrollable)
-        .barHeight(0)
         .onChange((index: number) => {
           this.currentFirstClassifyIndex = index
           this.listScroller.scrollToIndex(index, true, ScrollAlign.CENTER);
         })
-        .width('100%')
-        .layoutWeight(1)
         .alignRules({
           top: { anchor: 'tabs', align: VerticalAlign.Bottom },
           bottom: { anchor: '__container__', align: VerticalAlign.Bottom }
@@ -232,52 +239,14 @@ export struct ClassifyPage {
                 .width('100%')
                 .fontSize(12)
                 .fontColor($r('[module_base].color.txt_color'))
-                .padding({ left: 15 })
+                .padding({ left: 15, top: 5 })
             }
-            .clip(true)
-            .height(15)
+            .height(20)
 
             Grid() {
               ForEach(this.firstClassify, (item: Classify, index: number) => {
                 GridItem() {
-                  Column() {
-                    Image(item.classifyPic)
-                      .width(44)
-                      .height(44)
-                      .padding(1)
-                      .alt($r("[module_base].media.ic_default"))
-                      .margin({ left: 11, right: 11 })
-                      .border({
-                        radius: 100,
-                        color: this.currentFirstClassifyIndex == index ? $r('[module_base].color.theme_color') :
-                          0xffE5E5E5,
-                        width: this.currentFirstClassifyIndex == index ? 1 : 0
-                      })
-
-                    Text(item.classifyName?.substring(0,
-                      item.classifyName.length > 5 ? 6 : item.classifyName.length) ?? '')
-                      .width('auto')
-                      .height(20)
-                      .fontSize(11)
-                      .margin({ top: 5, bottom: 10 })
-                      .padding({
-                        left: 5,
-                        top: 2,
-                        right: 5,
-                        bottom: 2
-                      })
-                      .backgroundColor(this.currentFirstClassifyIndex == index ? $r('[module_base].color.theme_color') :
-                      Color.Transparent)
-                      .fontColor(this.currentFirstClassifyIndex == index ? Color.White :
-                      $r('[module_base].color.txt_color'))
-                      .borderRadius(20)
-                  }
-                  .padding({ top: 5 })
-                  .onClick(() => {
-                    if (this.currentFirstClassifyIndex != index) {
-                      this.controller.changeIndex(index)
-                      this.currentFirstClassifyId = item.classifyId ?? ''
-                    }
+                  this.tabBuilder(index, item, () => {
                     //关闭弹框不要动画
                     this.moveGridHeight = 0
                     this.isOpen = false
@@ -285,33 +254,33 @@ export struct ClassifyPage {
                 }
               })
             }
-            .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr')
-            .rowsTemplate(this.gridColumnCount)
-            .height(this.gridHeight)
             .width('100%')
+            .height(this.gridHeight)
             .padding({ left: 5, right: 5 })
+            .rowsTemplate(this.gridColumnCount)
+            .columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr')
 
             Row() {
               Text('点击收起')
                 .fontSize(12)
                 .fontColor($r('[module_base].color.txt_color_666'))
 
-              Image($r('app.media.iv_top_arrows'))
+              Image($r("app.media.ic_top_arrows"))
                 .width(15)
                 .margin({ left: 5 })
                 .height(this.moveGridHeight >= this.gridHeight + 60 ? 10 : 0)
             }
-            .justifyContent(FlexAlign.Center)
-            .width('100%')
             .height(40)
+            .width('100%')
+            .justifyContent(FlexAlign.Center)
             .onClick(() => {
               this.closeDialog()
             })
           }
-          .justifyContent(FlexAlign.Start)
           .clip(true)
           .width('100%')
           .height(this.moveGridHeight)
+          .justifyContent(FlexAlign.Start)
           .border({ radius: { bottomLeft: 10, bottomRight: 10 } })
           //点击列表空白地方不关闭弹框
           .onClick(() => {
@@ -325,8 +294,8 @@ export struct ClassifyPage {
           })
 
         }
-        .justifyContent(FlexAlign.Start)
         .width('100%')
+        .justifyContent(FlexAlign.Start)
         .height(this.isOpen ? '100%' : 0)
         .backgroundColor(this.moveGridHeight >= this.gridHeight + 60 ? '#3000' : '#0000')
         .onClick(() => {
@@ -371,42 +340,48 @@ export struct ClassifyPage {
   }
 
   @Builder
-  tabBuilder(index: number, item: Classify) {
+  tabBuilder(index: number, item: Classify, onClick?: () => void) {
     Column() {
       Image(item.classifyPic)
-        .width(44)
-        .height(44)
-        .padding(1)
-        .margin({ left: 11, right: 11 })
+        .width(this.currentFirstClassifyIndex == index ? 45 : 40)
+        .height(this.currentFirstClassifyIndex == index ? 45 : 40)
+        .margin({ left: 10, right: 10 })
         .border({
-          radius: 100,
-          color: this.currentFirstClassifyIndex == index ? $r('[module_base].color.theme_color') : 0xffE5E5E5,
-          width: this.currentFirstClassifyIndex == index ? 1 : 0
+          width: 2,
+          radius: this.currentFirstClassifyIndex == index ? 18 : 16,
+          color: this.currentFirstClassifyIndex == index ? $r('[module_base].color.theme_color') : Color.White
         })
 
       Text(item.classifyName?.substring(0,
         item.classifyName.length > 5 ? 6 : item.classifyName.length) ?? '')
+        .height(15)
         .width('auto')
-        .height(20)
-        .fontSize(11)
-        .margin({ top: 5, bottom: 10 })
+        .margin({ top: 5 })
+        .textAlign(TextAlign.Center)
+        .fontWeight(FontWeight.Medium)
+        .fontSize(this.currentFirstClassifyIndex == index ? 11 : 10)
         .padding({
-          left: 5,
-          top: 2,
-          right: 5,
-          bottom: 2
+          left: 3,
+          top: 1,
+          right: 3
         })
         .backgroundColor(this.currentFirstClassifyIndex == index ? $r("[module_base].color.theme_color") :
         Color.Transparent)
         .fontColor(this.currentFirstClassifyIndex == index ? Color.White : $r('[module_base].color.txt_color'))
         .borderRadius(20)
-    }.width('auto')
-    .height('auto')
-    .padding({ top: 5 })
+    }
+    .height(70)
+    .width('auto')
+    .margin({ top: 5 })
+    .justifyContent(FlexAlign.End)
     .onClick(() => {
       if (this.currentFirstClassifyIndex != index) {
         this.controller.changeIndex(index);
         this.currentFirstClassifyId = item.classifyId ?? ''
+      }
+
+      if (onClick) {
+        onClick()
       }
     })
   }
