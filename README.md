@@ -24,5 +24,8 @@
 
 ![img-ezgif com-resize](https://github.com/user-attachments/assets/4fa7cd76-5eac-4425-b0f8-a6fe8daf0522)
 
+github有时不稳定，若动图打不开的话，可以到简书上看效果：<br>
+https://www.jianshu.com/p/86b08aba8d60
+
 
 
