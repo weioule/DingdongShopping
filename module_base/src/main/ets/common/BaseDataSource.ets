@@ -19,9 +19,32 @@ export class BaseDataSource<T> implements IDataSource {
     return this.items[index];
   }
 
+  public reloadData(data: T[]): void {
+    this.items.length = 0;
+    this.items.push(...data);
+    this.notifyDataReload();
+  }
+
+  public addDataWhereIndex(data: T[], startIndex: number): void {
+    this.items.length = this.items.length > startIndex ? startIndex : this.items.length;
+    this.items.push(...data);
+    this.onDatasetChange(startIndex, data.length);
+  }
+
+  public loadMoreData(data: T[]): void {
+    let t = this.totalCount()
+    this.items.push(...data);
+    this.onDatasetChange(t, data.length);
+  }
+
   public onDataRefresh(data: T, index: number): void {
     this.items[index] = data
     this.notifyDataChange(index)
+  }
+
+  public clear(): void {
+    this.items = []
+    this.notifyDataReload()
   }
 
   registerDataChangeListener(listener: DataChangeListener): void {
@@ -39,53 +62,38 @@ export class BaseDataSource<T> implements IDataSource {
 
   notifyDataReload(): void {
     this.listeners.forEach(listener => {
-      listener.onDataReloaded();
+      listener.onDatasetChange([{ type: DataOperationType.RELOAD }])
     })
   }
 
   notifyDataAdd(index: number): void {
     this.listeners.forEach(listener => {
-      listener.onDataAdd(index);
+      listener.onDatasetChange([{ type: DataOperationType.ADD, index: index }])
     })
   }
 
   notifyDataChange(index: number): void {
     this.listeners.forEach(listener => {
-      listener.onDataChange(index);
+      listener.onDatasetChange([{ type: DataOperationType.CHANGE, index: index }])
     })
   }
 
   notifyDataDelete(index: number): void {
     this.listeners.forEach(listener => {
-      listener.onDataDelete(index);
+      listener.onDatasetChange([{ type: DataOperationType.DELETE, index: index }])
     })
   }
 
   notifyDataMove(from: number, to: number): void {
     this.listeners.forEach(listener => {
-      listener.onDataMove(from, to);
+      listener.onDatasetChange([{ type: DataOperationType.MOVE, index: { from: from, to: to } }])
     })
   }
 
-  public reloadData(data: T[]): void {
-    this.items.length = 0;
-    this.items.push(...data);
-    this.notifyDataReload();
-  }
-
-  public reloadDataWhereIndex(data: T[], startIndex: number): void {
-    this.items.length = this.items.length > startIndex ? startIndex : this.items.length;
-    this.items.push(...data);
-    this.notifyDataReload();
-  }
-
-  public loadMoreData(data: T[]): void {
-    this.items.push(...data);
-    this.notifyDataReload();
-  }
-
-  public clear(): void {
-    this.items = []
+  onDatasetChange(index: number, count: number): void {
+    this.listeners.forEach(listener => {
+      listener.onDatasetChange([{ type: DataOperationType.ADD, index: index, count: count }]);
+    })
   }
 }
 

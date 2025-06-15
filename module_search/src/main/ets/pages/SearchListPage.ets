@@ -48,7 +48,6 @@ export struct SearchListPage {
   @State selectTabIndex: number = -1
   @State waterFlowHeight: number = 0
   @State pullToRefreshHeight: number = 0
-  @State data: ResultParams | null = null
   @State guessYouLikeList: Commodity[] = []
   @State hasGuessYouLikeView: boolean = false
   @State refreshState: number = RefreshState.FREE
@@ -158,7 +157,6 @@ export struct SearchListPage {
         });
       }
 
-      this.data = null
       if (data.currentPage == 1) {
         this.dataSource.reloadData(data.searchList)
         this.dataSource.loadMoreData(data.guessYouLikeList)
