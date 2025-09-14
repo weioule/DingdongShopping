@@ -52,7 +52,7 @@ export struct AddCartButtonView {
         .fontSize(MyApp.Font.smallTextSize)
         .minFontSize(MyApp.Font.minimumTextSize)
         .backgroundColor($r('app.color.red_color'))
-        .visibility(this.cartNum > 0 ? Visibility.Visible : Visibility.None)
+        .visibility(this.cartNum > 0 ? Visibility.Visible : Visibility.Hidden)
         .padding({
           top: 1,
           bottom: 1,

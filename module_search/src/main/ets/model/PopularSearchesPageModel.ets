@@ -1,6 +1,8 @@
 import { Observable } from 'rxjs/internal/Observable';
 import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
 import { AssociativeWordsBean } from '../bean/AssociativeWordsBean';
+import { LeaderboardBean } from '../bean/LeaderboardBean';
+import { Commodity } from 'module_base/src/main/ets/bean/ClassifyBean';
 
 /**
  * @author weioule
@@ -11,6 +13,8 @@ export class PopularSearchesPageModel {
   declare associativeWordsList: (list: AssociativeWordsBean[]) => void;
   rx_popularSearchesList: Observable<PopularSearchesBean[]>
   declare popularSearchesList: (list: PopularSearchesBean[]) => void;
+  rx_leaderboardList: Observable<LeaderboardBean[]>
+  declare leaderboardList: (list: LeaderboardBean[]) => void;
 
   constructor() {
     this.rx_associativeWordsList = new Observable<AssociativeWordsBean[]>((observer) => {
@@ -20,6 +24,11 @@ export class PopularSearchesPageModel {
     });
     this.rx_popularSearchesList = new Observable<PopularSearchesBean[]>((observer) => {
       this.popularSearchesList = (list) => {
+        observer.next(list);
+      }
+    });
+    this.rx_leaderboardList = new Observable<LeaderboardBean[]>((observer) => {
+      this.leaderboardList = (list) => {
         observer.next(list);
       }
     });
@@ -100,6 +109,52 @@ export class PopularSearchesPageModel {
       list.push(bean13)
 
       this.popularSearchesList(list);
+      resolve('')
+    })
+  }
+
+  queryLeaderboardList(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let list: LeaderboardBean[] = []
+      for (let i = 0; i < 4; i++) {
+        let bean = new LeaderboardBean()
+        bean.name =
+          i == 0 ? '咚咚热搜' : 1 == i ? '6月时令水果榜' : 2 == i ? '附近人都在买' : '6月时令蔬菜榜'
+
+        let detailList: Commodity[] = []
+        for (let j = Math.floor(Math.random() * 5) + 6; j >= 0; j--) {
+          let bean = new Commodity()
+          if (i == 0) {
+            bean.itemType = 6
+            bean.commodityName = '咚咚热搜' + j
+            bean.heat = 30000 + j * 10000 + j * 1000 + j * 100
+            bean.hasStock = false
+          } else {
+            bean.itemType = 0
+            bean.hasStock = true
+            bean.commodityName = '时令时蔬时' + j
+            bean.price = j * 10 + j + j * 0.1
+            bean.commodityUnit = j % 2 == 0 ? '份' : '盒'
+            bean.commoditySpec = '约' + j * 100 + 'g'
+          }
+
+          if (i % 4 == 0) {
+            bean.commodityPic = $r("app.media.img_product1")
+          } else if (i % 4 == 1) {
+            bean.commodityPic = $r("app.media.img_product2")
+          } else if (i % 4 == 2) {
+            bean.commodityPic = $r("app.media.img_product3")
+          } else {
+            bean.commodityPic = $r("app.media.img_product4")
+          }
+
+          detailList.push(bean)
+        }
+        bean.list = detailList
+        list.push(bean)
+      }
+
+      this.leaderboardList(list);
       resolve('')
     })
   }

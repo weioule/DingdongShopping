@@ -7,6 +7,8 @@ import { MyApp } from 'module_base/src/main/ets/common/Application';
 import { AppRouter } from 'module_base/src/main/ets/common/AppRouter';
 import { PopularSearchesPageModel } from '../model/PopularSearchesPageModel';
 import PreferencesUtils, { PreferencesKey } from 'module_base/src/main/ets/utils/PreferencesUtils';
+import { LeaderboardBean } from '../bean/LeaderboardBean';
+import { LeaderboardView } from '../view/LeaderboardView';
 
 /**
  * @author weioule
@@ -18,10 +20,13 @@ export struct PopularSearchesPage {
   private timeoutId: number = 0
   @State keyword: string = '';
   @State cartNum: number = 100
+  @State scrollHeight: number = 0
+  @State searchHistoryHeight: number = 0
   @State placeholder: string = '';
   @State picUrl: Resource | null = null;
   @State searchHistoryList: string[] = [];
   @State popularSearchesList: PopularSearchesBean[] = []
+  @State leaderboardList: LeaderboardBean[] = []
   @State popularSearches: PopularSearchesBean | null = null
   @State AssociativeWordsList: AssociativeWordsBean[] | null = null
   @Provide viewModel: PopularSearchesPageModel = new PopularSearchesPageModel();
@@ -33,12 +38,16 @@ export struct PopularSearchesPage {
     this.viewModel.rx_popularSearchesList.subscribe(list => {
       this.popularSearchesList = list
     })
+    this.viewModel.rx_leaderboardList.subscribe(list => {
+      this.leaderboardList = list
+    })
 
     PreferencesUtils.get(PreferencesKey.searchRecordsLocallyKey, []).then(map => {
       this.searchHistoryList = map as string[]
     })
 
     this.viewModel.queryHotSearch()
+    this.viewModel.queryLeaderboardList()
   }
 
   aboutToDisappear(): void {
@@ -154,12 +163,12 @@ export struct PopularSearchesPage {
                   this.startTimer()
                 }
               })
+              .width('100%')
+              .defaultFocus(true)//默认获取焦点
               .alignRules({
                 top: { anchor: '__container__', align: VerticalAlign.Top },
                 bottom: { anchor: '__container__', align: VerticalAlign.Bottom }
               })
-              .width('100%')
-              .defaultFocus(true) //默认获取焦点
           }
           .layoutWeight(1)
 
@@ -199,7 +208,7 @@ export struct PopularSearchesPage {
           left: { anchor: 'iv_back', align: HorizontalAlign.End },
           top: { anchor: '__container__', align: VerticalAlign.Top },
           right: { anchor: 'rc_cart', align: HorizontalAlign.Start },
-          bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
+          bottom: { anchor: '__container__', align: VerticalAlign.Bottom }
         })
 
         RelativeContainer() {
@@ -207,34 +216,34 @@ export struct PopularSearchesPage {
             .width(24)
             .height(24)
             .id('iv_cart')
+            .objectFit(ImageFit.Contain)
             .alignRules({
               top: { anchor: '__container__', align: VerticalAlign.Top },
-              bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
+              bottom: { anchor: '__container__', align: VerticalAlign.Bottom }
             })
-            .objectFit(ImageFit.Contain)
 
           Text((this.cartNum > 99) ? "99+" : `${this.cartNum}`)
+            .height(13)
             .fontSize(10)
+            .width('auto')
             .minFontSize(8)
+            .borderRadius(6)
+            .margin({ left: -10 })
             .fontColor(Color.White)
             .textAlign(TextAlign.Center)
-            .backgroundColor($r('[module_base].color.red_color'))
             .constraintSize({ minWidth: 13 })
-            .width('auto')
-            .height(13)
+            .backgroundColor($r('[module_base].color.red_color'))
+            .visibility(this.cartNum > 0 ? Visibility.Visible : Visibility.None)
             .padding({
               top: 1,
               bottom: 1,
               left: 2,
               right: 2
             })
-            .margin({ left: -10 })
-            .borderRadius(6)
             .alignRules({
               top: { anchor: '__container__', align: VerticalAlign.Top },
               left: { anchor: 'iv_cart', align: HorizontalAlign.End }
             })
-            .visibility(this.cartNum > 0 ? Visibility.Visible : Visibility.None)
         }
         .width(50)
         .height(30)
@@ -248,99 +257,141 @@ export struct PopularSearchesPage {
           right: { anchor: '__container__', align: HorizontalAlign.End },
           bottom: { anchor: '__container__', align: VerticalAlign.Bottom },
         })
-
       }
       .height(42)
       .width('100%')
 
       RelativeContainer() {
-        Column() {
-          Row() {
-            Text('历史搜索')
-              .fontSize(12)
-              .margin({ left: 10, top: 15 })
+        Scroll() {
+          Column() {
+            Row() {
+              Text('历史搜索')
+                .fontSize(12)
+                .height(30)
+                .margin({ left: 10, top: 10 })
+                .align(Alignment.Center)
+                .fontColor($r('[module_base].color.txt_color_999'))
+                .alignSelf(ItemAlign.Center)
+
+              Image($r("app.media.ic_delete_btn"))
+                .width(28)
+                .height(30)
+                .margin({ right: 6, top: 10 })
+                .objectFit(ImageFit.Contain)
+                .padding({
+                  top: 8,
+                  bottom: 8,
+                  left: 4,
+                  right: 4
+                })
+                .onClick(() => {
+                  this.searchHistoryList = []
+                  PreferencesUtils.save(PreferencesKey.searchRecordsLocallyKey, this.searchHistoryList)
+                })
+            }
+            .width('100%')
+            .height(50)
+            .padding({ top: 5, bottom: 5 })
+            .justifyContent(FlexAlign.SpaceBetween)
+            .visibility(this.searchHistoryList.length > 0 ? Visibility.Visible : Visibility.None)
+
+            Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
+              ForEach(this.searchHistoryList, (item: string, index?: number) => {
+                Row() {
+                  Text(item)
+                    .height(26)
+                    .fontSize(12)
+                    .borderRadius(3)
+                    .margin({ right: 8, bottom: 8 })
+                    .fontColor($r('[module_base].color.txt_color_666'))
+                    .backgroundColor($r('[module_base].color.white_f6'))
+                    .padding({
+                      left: 10,
+                      right: 10,
+                    })
+                    .onClick(() => {
+                      this.insertHistory(item)
+                    })
+                }
+              })
+            }.padding({ left: 10, right: 10 })
+            .onAreaChange((oldValue, newValue) => {
+              if (this.searchHistoryHeight != newValue.height as number) {
+                this.scrollHeight = this.scrollHeight - (oldValue.height as number) + (newValue.height as number) +
+                this.searchHistoryHeight == 0 ? 50 : 0 //历史搜索文案Row的高度
+                this.searchHistoryHeight = newValue.height as number
+              }
+            })
+
+            Text('搜索发现')
               .fontColor($r('[module_base].color.txt_color_999'))
+              .fontSize(12)
+              .margin({ top: 20 })
+              .padding({ left: 10, bottom: 15 })
+              .visibility(this.popularSearchesList.length > 0 ? Visibility.Visible : Visibility.None)
 
-            Image($r("app.media.ic_delete_btn"))
-              .width(28)
-              .height(30)
-              .objectFit(ImageFit.Contain)
-              .margin({ right: 6 })
-              .padding({
-                top: 8,
-                bottom: 8,
-                left: 4,
-                right: 4
+            Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
+              ForEach(this.popularSearchesList, (item: PopularSearchesBean, index?: number) => {
+                Row() {
+                  Image($r("app.media.ic_fire"))
+                    .width(15)
+                    .height(15)
+                    .margin({ right: 3, bottom: 3 })
+                    .visibility(item.isHot ? Visibility.Visible : Visibility.None)
+
+                  Text(item.name)
+                    .fontSize(12)
+                    .fontColor($r('[module_base].color.txt_color_666'))
+                }
+                .height(26)
+                .borderRadius(3)
+                .margin({ right: 8, bottom: 8 })
+                .backgroundColor($r('[module_base].color.white_f6'))
+                .padding({
+                  left: 10,
+                  right: 10,
+                })
+                .onClick(() => {
+                  this.insertHistory(item.name)
+                })
               })
-              .onClick(() => {
-                this.searchHistoryList = []
-                PreferencesUtils.save(PreferencesKey.searchRecordsLocallyKey, this.searchHistoryList)
+
+            }
+            .padding({ left: 10, right: 10 })
+
+            Swiper() {
+              ForEach(this.leaderboardList, (item: LeaderboardBean, index: number) => {
+                LeaderboardView({ data: item, index: index })
               })
-          }
-          .justifyContent(FlexAlign.SpaceBetween)
-          .height('auto')
-          .width('100%')
-          .padding({ top: 5 })
-          .visibility(this.searchHistoryList.length > 0 ? Visibility.Visible : Visibility.None)
-
-          Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
-            ForEach(this.searchHistoryList, (item: string, index?: number) => {
-              Row() {
-                Text(item)
-                  .fontSize(12)
-                  .fontColor($r('[module_base].color.txt_color_666'))
-                  .borderRadius(3)
-                  .height(26)
-                  .padding({
-                    left: 10,
-                    right: 10,
-                  })
-                  .onClick(() => {
-                    this.insertHistory(item)
-                  })
-                  .margin({ right: 8, top: 8 })
-                  .backgroundColor($r('[module_base].color.white_f6'))
-              }
-            })
-          }.padding({ left: 10, right: 10, bottom: 10 })
-
-          Text('搜索发现')
-            .fontColor($r('[module_base].color.txt_color_999'))
-            .fontSize(12)
-            .margin({ top: 20 })
-            .padding({ left: 10, bottom: 5 })
-            .visibility(this.popularSearchesList.length > 0 ? Visibility.Visible : Visibility.None)
-
-          Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap }) {
-            ForEach(this.popularSearchesList, (item: PopularSearchesBean, index?: number) => {
-              Row() {
-                Image($r("app.media.ic_fire"))
-                  .width(15)
-                  .height(15)
-                  .margin({ right: 3, bottom: 3 })
-                  .visibility(item.isHot ? Visibility.Visible : Visibility.None)
-
-                Text(item.name)
-                  .fontSize(12)
-                  .fontColor($r('[module_base].color.txt_color_666'))
-              }
-              .height(26)
-              .borderRadius(3)
-              .backgroundColor($r('[module_base].color.white_f6'))
-              .padding({
-                left: 10,
-                right: 10,
-              })
-              .onClick(() => {
-                this.insertHistory(item.name)
-              })
-              .margin({ right: 8, top: 8 })
+            }
+            .height('auto')
+            .padding({ left: 10, top: 20, right: 10 })
+            .indicator(false) // 可选：显示指示器
+            .itemSpace(10) // 设置项与项之间的间隔为10vp
+            .linearGradient({
+              colors: [
+                ['#ffffff', 0.0],
+                ['#f0f0f0', 0.15],
+                ['#f0f0f0', 1.0],
+              ]
             })
 
-          }.padding({ left: 10, right: 10 })
-        }.alignItems(HorizontalAlign.Start)
+            Blank().height(100).backgroundColor('#f0f0f0')
+
+          }.width('100%')
+          .alignItems(HorizontalAlign.Start)
+          .height(this.scrollHeight > 0 ? this.scrollHeight : 'auto')
+          .onAreaChange((oldValue, newValue) => {
+            if (this.scrollHeight != newValue.height) {
+              // 动态设置Scroll高度（不超过屏幕剩余空间）
+              this.scrollHeight = (newValue.height as number)
+            }
+          })
+        }
         .width('100%')
-        .height('100%')
+        .scrollBar(BarState.Off)
+        .scrollable(ScrollDirection.Vertical)
+        .height(this.scrollHeight > 0 ? this.scrollHeight : 1000)
 
         List() {
           ForEach(this.AssociativeWordsList, (item: AssociativeWordsBean, index?: number) => {
@@ -359,20 +410,20 @@ export struct PopularSearchesPage {
                 this.insertHistory(item.name)
               })
               .width('100%')
-              .textAlign(TextAlign.Start)
               .padding({ left: 16 })
+              .textAlign(TextAlign.Start)
               .border({ width: { bottom: 1 }, color: $r('[module_base].color.line_gray') })
             }
           })
+
         }.width('100%')
         .height('100%')
         .backgroundColor(Color.White)
         .visibility(this.keyword && this.AssociativeWordsList ? Visibility.Visible : Visibility.None)
       }
 
-    }.padding({
-      top: MyApp.Size.statusBar,
-    })
+    }.padding({ top: MyApp.Size.statusBar })
+    .backgroundColor(Color.White)
   }
 
   private queryAssociativeWords(searchKey: string) {

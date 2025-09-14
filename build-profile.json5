@@ -1,19 +1,6 @@
 {
   "app": {
     "signingConfigs": [
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "/Users/weioule/.ohos/config/default_DingdongShopping_F5ktHPH9tIOEwA7KXeEy8J7S0Mw8OsTWbxRX8e43MC4=.cer",
-          "storePassword": "0000001B5975531B84E738F3AA42C584B60479D0A5E80EF7AA8C6BBAA5363E733F51532D3770698587BE05",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001BEF7B7769D87FD112E61C0680853FAFE2F1B6BD2F8FBA1C8BE571E02DAAA405444E54DEFC666E44",
-          "profile": "/Users/weioule/.ohos/config/default_DingdongShopping_F5ktHPH9tIOEwA7KXeEy8J7S0Mw8OsTWbxRX8e43MC4=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/weioule/.ohos/config/default_DingdongShopping_F5ktHPH9tIOEwA7KXeEy8J7S0Mw8OsTWbxRX8e43MC4=.p12"
-        }
-      }
     ],
     "products": [
       {

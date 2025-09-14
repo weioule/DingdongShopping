@@ -61,9 +61,10 @@ export struct ClassifyContentView {
           }
         })
       }
-      .backgroundColor('#f6f6f6')
+      .enableScrollInteraction(false)
       .alignListItem(ListItemAlign.Center)
       .edgeEffect(EdgeEffect.None)
+      .backgroundColor('#f6f6f6')
       .scrollBar(BarState.Off)
       .height('100%')
       .width('25%')
