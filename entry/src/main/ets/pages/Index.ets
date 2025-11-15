@@ -1,10 +1,9 @@
-import { common } from '@kit.AbilityKit';
 import { HomePage } from 'module_home/src/main/ets/pages/HomePage';
 import { ClassifyPage } from 'module_classify/src/main/ets/pages/ClassifyPage';
 import { ShoppingCartPage } from 'module_shopping_cart/src/main/ets/pages/ShoppingCartPage';
 import { UserPage } from 'module_user/src/main/ets/pages/UserPage';
 import { MyApp } from 'module_base/src/main/ets/common/Application';
-import { MembershipQrCodePage } from './MembershipQrCodePage';
+import { AiSearchPage } from './AiSearchPage';
 
 /**
  * @author weioule
@@ -14,13 +13,12 @@ import { MembershipQrCodePage } from './MembershipQrCodePage';
 @Entry
 @Component
 export struct Index {
-  public static context = (getContext() as common.UIAbilityContext)
-  @State currentIndex: number = 1
+  @State currentIndex: number = 0
   @State mainShow: boolean = false;
   @State userShow: boolean = false;
   @State classifyShow: boolean = true;
   @State shopCartShow: boolean = false;
-  @State membershipQrCode: boolean = false;
+  @State aiSearchShow: boolean = false;
 
   build() {
     Tabs({ barPosition: BarPosition.End, index: this.currentIndex }) {
@@ -35,10 +33,10 @@ export struct Index {
       .tabBar(this.TabBuilder('分类', 1, $r("app.media.ic_classify_theme"), $r("app.media.ic_classify_gray")))
 
       TabContent() {
-        MembershipQrCodePage({ membershipQrCode: this.membershipQrCode })
+        AiSearchPage({ aiSearchShow: this.aiSearchShow })
       }
-      .tabBar(this.TabBuilder('', 2, $r('app.media.ic_membership_qr_code'),
-        $r('app.media.ic_membership_qr_code')))
+      .tabBar(this.TabBuilder('', 2, $r('app.media.ic_ai'),
+        $r('app.media.ic_ai')))
 
       TabContent() {
         ShoppingCartPage({ shopCartShow: this.shopCartShow })
@@ -63,7 +61,7 @@ export struct Index {
       } else if (this.currentIndex == 1) {
         this.classifyShow = false
       } else if (this.currentIndex == 2) {
-        this.membershipQrCode = false
+        this.aiSearchShow = false
       } else if (this.currentIndex == 3) {
         this.shopCartShow = false
       } else if (this.currentIndex == 4) {
@@ -77,7 +75,7 @@ export struct Index {
       } else if (this.currentIndex == 1) {
         this.classifyShow = true
       } else if (this.currentIndex == 2) {
-        this.membershipQrCode = true
+        this.aiSearchShow = true
       } else if (this.currentIndex == 3) {
         this.shopCartShow = true
       } else if (this.currentIndex == 4) {
@@ -97,7 +95,7 @@ export struct Index {
           .margin({ top: 5 })
           .fontSize(this.currentIndex === targetIndex ? 13 : 12)
           .fontColor(this.currentIndex === targetIndex ? $r("[module_base].color.green_color") :
-          $r('[module_base].color.txt_color_999'))
+            $r('[module_base].color.txt_color_999'))
       }
     }
     .height('100%')

@@ -7,7 +7,6 @@ import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearch
  */
 @Component
 export struct SeamlessScrollView {
-  @Link currentIndex: number;
   @State delay: number = 3000;
   @State fontSize: number = 15;
   @State private offsetY: number = 0;
@@ -17,6 +16,7 @@ export struct SeamlessScrollView {
   private textHeight: number = 30; // 单行高度
   @State popularSearches: PopularSearchesBean[] = [];
   @State containerHeight: number = this.textHeight * this.popularSearches.length;
+  private onPopularSearchesIndexChange?: (newIndex: number) => void
 
   // 精准计算滚动时机
   startScroll() {
@@ -32,8 +32,8 @@ export struct SeamlessScrollView {
         }
       }, () => {
         this.offsetY -= this.textHeight;
-        this.currentIndex = Math.abs(this.offsetY) / this.textHeight
-      });
+        this.onPopularSearchesIndexChange?.(Math.abs(this.offsetY) / this.textHeight)
+      })
     }, this.delay);
   }
 
@@ -61,6 +61,7 @@ export struct SeamlessScrollView {
             }
 
             Text(item.name)
+              .maxLines(1)
               .width('100%')
               .height(this.textHeight)
               .fontSize(this.fontSize)
@@ -117,13 +118,13 @@ export struct SeamlessScrollView {
     .opacity(0.99)
     .height(this.textHeight) // 单行可视区域
     .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
-      if (isVisible && this.isVisible != true) {
+      if (isVisible && !this.isVisible) {
         this.isVisible = true
         this.startScroll()
       } else if (this.isVisible) {
         this.isVisible = false
-        if (this.timer) {
-          clearInterval(this.timer);
+        if (null != this.timer) {
+          clearInterval(this.timer)
         }
       }
     })

@@ -1,6 +1,6 @@
 import { router } from '@kit.ArkUI';
-import { PopularSearchesBean } from '../bean/PopularSearchesBean';
 import { MyApp } from './Application';
+import { PopularSearchesBean } from '../bean/PopularSearchesBean';
 
 /**
  * @author weioule
@@ -9,8 +9,7 @@ import { MyApp } from './Application';
  */
 export namespace AppRouter {
   //搜索关键字页面
-  export function toSearchPage(keyword?: string, popularSearches?: PopularSearchesBean,
-    finishSelf?: boolean) {
+  export function toSearchPage(keyword?: string, popularSearches?: PopularSearchesBean, finishSelf?: boolean) {
     if (finishSelf) {
       router.replaceUrl({
         url: MyApp.getPageUrl(MyApp.Module.module_search, MyApp.Pages.popularSearchesPage),

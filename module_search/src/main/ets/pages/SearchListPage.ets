@@ -10,6 +10,7 @@ import { BaseDataSource } from 'module_base/src/main/ets/common/BaseDataSource';
 import { CommodityItemView } from 'module_base/src/main/ets/view/CommodityItemView';
 import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
 import { PullToRefresh, RefreshState } from 'module_base/src/main/ets/refresh/MyPullToRefresh';
+import { StatusBarContentColor, StatusBarUtils } from 'module_base/src/main/ets/utils/StatusBarUtils';
 import { PullToRefreshConfigurator } from 'module_base/src/main/ets/refresh/MyPullToRefreshConfigurator';
 
 export interface PARAMS {
@@ -61,6 +62,8 @@ export struct SearchListPage {
   @State dataSource: BaseDataSource<Commodity> = new BaseDataSource<Commodity>()
 
   aboutToAppear(): void {
+    StatusBarUtils.setStatusBarTextColor(MyApp.AppUtil.context, StatusBarContentColor.BLACK);
+
     this.viewModel.rx_searchCategoryList.subscribe(list => {
       this.searchCategoryList = list
     })
@@ -73,7 +76,7 @@ export struct SearchListPage {
         this.sections.splice(0, this.sections.length())
 
         //添加商品列表顶部的空组件以实现外边距,通过SectionOptions设置margin也可以实现，但跟着下拉刷新组件一起使用时，下拉放手后顶部的外边距没有了，故使用空条目的形式实现
-        data.searchList.unshift(new Commodity(5, Date.now() + Math.random().toString()))
+        data.searchList.unshift(new Commodity(5))
         this.sections.push({
           itemsCount: 1, //子条目数量
           crossCount: 1 //一列
@@ -81,7 +84,7 @@ export struct SearchListPage {
 
         if (data.searchList.length == 1) {
           //搜索结果没有数据，那就添加空页面显示
-          data.searchList.push(new Commodity(1, Date.now() + Math.random().toString()))
+          data.searchList.push(new Commodity(1))
           //添加空页面配置
           this.sections.push({
             itemsCount: 1,
@@ -114,7 +117,7 @@ export struct SearchListPage {
       if (data.guessYouLikeList.length > 0) {
         if (this.installGuessYouLikeTitleIndex == -1) {
           this.installGuessYouLikeTitleIndex = this.dataSource.totalCount() + data.searchList.length
-          data.guessYouLikeList.unshift(new Commodity(2, Date.now().toString()))
+          data.guessYouLikeList.unshift(new Commodity(2))
           //猜你喜欢组件，独占一行配置
           this.sections.push({
             itemsCount: 1,
@@ -135,7 +138,7 @@ export struct SearchListPage {
 
       if (!data.hasNextPage && this.dataSource.totalCount() >= 6) {
         //‘我是有底线的’，独占一行配置，因为使用sections分组配置后，WaterFlow的footer就不起作用了
-        data.guessYouLikeList.push(new Commodity(4, Date.now() + Math.random().toString()))
+        data.guessYouLikeList.push(new Commodity(4))
         this.sections.push({
           itemsCount: 1,
           crossCount: 1
@@ -144,13 +147,13 @@ export struct SearchListPage {
 
       //添加尾部的外边距组件，防止上拉抬手后底部的外边距不显示的问题
       if (data.guessYouLikeList.length > 0) {
-        data.guessYouLikeList.push(new Commodity(5, Date.now() + Math.random().toString()))
+        data.guessYouLikeList.push(new Commodity(5))
         this.sections.push({
           itemsCount: 1,
           crossCount: 1
         });
       } else if (data.searchList.length > 0) {
-        data.searchList.push(new Commodity(5, Date.now() + Math.random().toString()))
+        data.searchList.push(new Commodity(5))
         this.sections.push({
           itemsCount: 1,
           crossCount: 1
@@ -468,7 +471,7 @@ export struct SearchListPage {
           .textAlign(TextAlign.Center)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.searchType == 0 ? $r('[module_base].color.theme_color') :
-          $r('[module_base].color.txt_color_666'))
+            $r('[module_base].color.txt_color_666'))
           .onClick(() => {
             if (this.searchType != 0) {
               this.pageNo = 1
@@ -485,7 +488,7 @@ export struct SearchListPage {
           .textAlign(TextAlign.Center)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.searchType == 1 ? $r('[module_base].color.theme_color') :
-          $r('[module_base].color.txt_color_666'))
+            $r('[module_base].color.txt_color_666'))
           .onClick(() => {
             if (this.searchType != 1) {
               this.pageNo = 1
@@ -505,11 +508,11 @@ export struct SearchListPage {
             .fontWeight(FontWeight.Medium)
             .padding({ left: 2, bottom: 2, right: 1 })
             .fontColor(this.searchType == 2 ? $r('[module_base].color.theme_color') :
-            $r('[module_base].color.txt_color_666'))
+              $r('[module_base].color.txt_color_666'))
 
           Image(this.searchType == 2 ?
             this.priceSortType == 1 ? $r('[module_base].media.ic_sort_up') : $r('[module_base].media.ic_sort_down') :
-          $r('[module_base].media.ic_sort_def'))
+            $r('[module_base].media.ic_sort_def'))
             .width(6)
             .height(6)
 
@@ -613,7 +616,7 @@ export struct SearchListPage {
               this.folded ? $r('[module_base].color.white_f6') : Color.Transparent)
             .fontColor(this.selectTabIndex == index ?
               (this.folded ? Color.White : $r('[module_base].color.theme_color')) :
-            $r('[module_base].color.txt_color'))
+              $r('[module_base].color.txt_color'))
 
         }.onClick(() => {
           if (this.selectTabIndex != index) {

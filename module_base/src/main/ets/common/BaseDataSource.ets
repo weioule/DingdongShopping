@@ -31,10 +31,18 @@ export class BaseDataSource<T> implements IDataSource {
     this.onDatasetChange(startIndex, data.length);
   }
 
-  public loadMoreData(data: T[]): void {
-    let t = this.totalCount()
-    this.items.push(...data);
-    this.onDatasetChange(t, data.length);
+  public loadMoreData(data: T | T[]): void {
+    let t = this.totalCount();
+
+    if (Array.isArray(data)) {
+      // 处理数组情况
+      this.items.push(...data);
+      this.onDatasetChange(t, data.length);
+    } else {
+      // 处理单个对象情况
+      this.items.push(data);
+      this.onDatasetChange(t, 1);
+    }
   }
 
   public onDataRefresh(data: T, index: number): void {

@@ -1,14 +1,15 @@
 import { router } from '@kit.ArkUI';
 import { PARAMS } from './SearchListPage';
-import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
+import { LeaderboardBean } from '../bean/LeaderboardBean';
+import { LeaderboardView } from '../view/LeaderboardView';
 import { AssociativeWordsBean } from '../bean/AssociativeWordsBean';
 import { ToastUtil } from 'module_base/src/main/ets/utils/ToastUtil';
 import { MyApp } from 'module_base/src/main/ets/common/Application';
 import { AppRouter } from 'module_base/src/main/ets/common/AppRouter';
 import { PopularSearchesPageModel } from '../model/PopularSearchesPageModel';
+import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
 import PreferencesUtils, { PreferencesKey } from 'module_base/src/main/ets/utils/PreferencesUtils';
-import { LeaderboardBean } from '../bean/LeaderboardBean';
-import { LeaderboardView } from '../view/LeaderboardView';
+import { StatusBarContentColor, StatusBarUtils } from 'module_base/src/main/ets/utils/StatusBarUtils';
 
 /**
  * @author weioule
@@ -32,6 +33,8 @@ export struct PopularSearchesPage {
   @Provide viewModel: PopularSearchesPageModel = new PopularSearchesPageModel();
 
   aboutToAppear(): void {
+    StatusBarUtils.setStatusBarTextColor(MyApp.AppUtil.context, StatusBarContentColor.BLACK);
+
     this.viewModel.rx_associativeWordsList.subscribe(list => {
       this.AssociativeWordsList = list
     })
@@ -185,7 +188,7 @@ export struct PopularSearchesPage {
           Line()
             .width(1)
             .height(17)
-            .backgroundColor($r('[module_base].color.green_color'))
+            .backgroundColor($r('[module_base].color.theme_color'))
 
           Text('搜索')
             .fontSize(13)

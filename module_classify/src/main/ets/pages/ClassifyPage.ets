@@ -6,6 +6,7 @@ import { ClassifyContentView } from '../view/ClassifyContentView';
 import { StateLayout, StateType } from 'module_base/src/main/ets/view/Statelayout';
 import { MyApp } from 'module_base/src/main/ets/common/Application';
 import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
+import { StatusBarContentColor, StatusBarUtils } from 'module_base/src/main/ets/utils/StatusBarUtils';
 
 /**
  * @author weioule
@@ -19,7 +20,6 @@ export struct ClassifyPage {
   private listScroller: Scroller = new Scroller();
   private viewModel: ClassifyModel = new ClassifyModel();
   private controller: TabsController = new TabsController()
-
   @State gridHeight: number = 0
   @State isOpen: boolean = false
   @State firstInit: boolean = true
@@ -57,6 +57,8 @@ export struct ClassifyPage {
   }
 
   aboutToAppear(): void {
+    StatusBarUtils.setStatusBarTextColor(MyApp.AppUtil.context, StatusBarContentColor.BLACK);
+
     this.customShow()
     emitter.on('10001', (eventData: emitter.GenericEventData<number>) => {
       //上下拉刷新切换tab
@@ -124,12 +126,12 @@ export struct ClassifyPage {
   build() {
     RelativeContainer() {
       Column() {
-        SearchInput({ popularSearches: this.popularSearches })
+        SearchInput({ popularSearches: this.popularSearches, showSearchIcon: true })
       }
       .width('100%')
       .id('search_input')
-      .height(45 + MyApp.Size.statusBar)
       .justifyContent(FlexAlign.Center)
+      .height(45 + MyApp.Size.statusBar)
       .linearGradient({
         angle: 90,
         colors: [
@@ -366,7 +368,7 @@ export struct ClassifyPage {
           right: 3
         })
         .backgroundColor(this.currentFirstClassifyIndex == index ? $r("[module_base].color.theme_color") :
-        Color.Transparent)
+          Color.Transparent)
         .fontColor(this.currentFirstClassifyIndex == index ? Color.White : $r('[module_base].color.txt_color'))
         .borderRadius(20)
     }

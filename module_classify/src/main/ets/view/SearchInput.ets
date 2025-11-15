@@ -3,14 +3,17 @@
  * @date 2025-02-09
  * 搜索框
  */
+import { SeamlessScrollView } from './SeamlessScrollView';
 import { AppRouter } from 'module_base/src/main/ets/common/AppRouter';
 import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
-import { SeamlessScrollView } from './SeamlessScrollView';
+
 
 @Component
 export struct SearchInput {
+  @State showSearchIcon: boolean = false
+  @State popularSearchesCurrentIndex: number = 0
   @State popularSearches: PopularSearchesBean[] = []
-  @State currentIndex: number = 0
+  private onPopularSearchesIndexChange?: (newIndex: number) => void
 
   build() {
     Flex({ alignItems: ItemAlign.Center }) {
@@ -20,17 +23,21 @@ export struct SearchInput {
         .margin({
           left: 10,
           right: 10
-        })
+        }).visibility(this.showSearchIcon ? Visibility.Visible : Visibility.None)
 
       if (this.popularSearches.length > 0) {
         SeamlessScrollView({
           fontSize: 13,
-          currentIndex: this.currentIndex,
           popularSearches: this.popularSearches,
-          fontColor: $r('[module_base].color.gray_color')
+          fontColor: $r('[module_base].color.gray_color'),
+          onPopularSearchesIndexChange: (newIndex: number) => {
+            this.popularSearchesCurrentIndex = newIndex
+            this.onPopularSearchesIndexChange?.(newIndex)
+          }
         })
           .flexGrow(1)
           .height('100%')
+
       } else {
         Text('搜索商品')
           .flexGrow(1)
@@ -38,11 +45,13 @@ export struct SearchInput {
           .height('100%')
           .fontColor($r('[module_base].color.gray_color'))
       }
-    }.onClick(() => {
-      AppRouter.toSearchPage('', this.popularSearches.length > 0 ? this.popularSearches[this.currentIndex] : undefined)
-    })
+    }
     .height(30)
-    .borderRadius(50)
+    .border({ radius: 20 })
     .backgroundColor(Color.White)
+    .onClick(() => {
+      AppRouter.toSearchPage('', this.popularSearches.length > 0 ?
+        this.popularSearches[this.popularSearchesCurrentIndex % this.popularSearches.length] : undefined)
+    })
   }
 }

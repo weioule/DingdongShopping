@@ -1,8 +1,8 @@
 @Entry
 @Component
-export struct MembershipQrCodePage {
-  @State message: string = 'MembershipQrCodePage';
-  @Prop @Watch('customShow') membershipQrCode: boolean
+export struct AiSearchPage {
+  @State message: string = 'aiSearchPage';
+  @Prop @Watch('customShow') aiSearchShow: boolean
 
   customShow() {
 
