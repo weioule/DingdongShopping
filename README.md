@@ -24,6 +24,14 @@
 
 ![img-ezgif com-resize](https://github.com/user-attachments/assets/4fa7cd76-5eac-4425-b0f8-a6fe8daf0522)
 
+
+15/11.<br>
+新增首页效果实现
+
+首页使用WaterFlow实现多条目列表+吸顶效果，向上滚动时搜索框宽度逐渐缩小，慢慢展示可约配送时间，重点也还是WaterFlowSections的使用。<br>
+下面是效果图：
+
+
 github有时不稳定，若动图打不开的话，可以到简书上看效果：<br>
 https://www.jianshu.com/p/86b08aba8d60
 
