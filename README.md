@@ -31,6 +31,8 @@
 首页使用WaterFlow实现多条目列表+吸顶效果，向上滚动时搜索框宽度逐渐缩小，慢慢展示可约配送时间，重点也还是WaterFlowSections的使用。<br>
 下面是效果图：
 
+![首页效果](https://github.com/weioule/DingdongShopping/blob/main/AppScope/resources/base/media/img_home.png)
+
 
 github有时不稳定，若动图打不开的话，可以到简书上看效果：<br>
 https://www.jianshu.com/p/86b08aba8d60
