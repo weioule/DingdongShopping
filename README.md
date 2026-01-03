@@ -32,7 +32,10 @@
 下面是效果图：
 
 ![首页效果](https://github.com/weioule/DingdongShopping/blob/main/AppScope/resources/base/media/img_home.png)
-
+<br><br><br>
+03/01/2026.<br>
+1首页新增引流banners、商品列表banner功能<br>
+2首页顶部、悬浮搜索框与分类页搜索框同步滚动效果实现<br><br>
 
 github有时不稳定，若动图打不开的话，可以到简书上看效果：<br>
 https://www.jianshu.com/p/86b08aba8d60
