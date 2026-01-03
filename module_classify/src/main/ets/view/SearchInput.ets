@@ -7,13 +7,13 @@ import { SeamlessScrollView } from './SeamlessScrollView';
 import { AppRouter } from 'module_base/src/main/ets/common/AppRouter';
 import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearchesBean';
 
-
 @Component
 export struct SearchInput {
   @State showSearchIcon: boolean = false
   @State popularSearchesCurrentIndex: number = 0
   @State popularSearches: PopularSearchesBean[] = []
-  private onPopularSearchesIndexChange?: (newIndex: number) => void
+  // 关键：也连接到全局索引
+  @StorageLink('globalScrollIndex') globalScrollIndex: number = 0
 
   build() {
     Flex({ alignItems: ItemAlign.Center }) {
@@ -29,11 +29,7 @@ export struct SearchInput {
         SeamlessScrollView({
           fontSize: 13,
           popularSearches: this.popularSearches,
-          fontColor: $r('[module_base].color.gray_color'),
-          onPopularSearchesIndexChange: (newIndex: number) => {
-            this.popularSearchesCurrentIndex = newIndex
-            this.onPopularSearchesIndexChange?.(newIndex)
-          }
+          fontColor: $r('[module_base].color.gray_color')
         })
           .flexGrow(1)
           .height('100%')
@@ -51,7 +47,7 @@ export struct SearchInput {
     .backgroundColor(Color.White)
     .onClick(() => {
       AppRouter.toSearchPage('', this.popularSearches.length > 0 ?
-        this.popularSearches[this.popularSearchesCurrentIndex % this.popularSearches.length] : undefined)
+        this.popularSearches[this.globalScrollIndex] : undefined)
     })
   }
 }

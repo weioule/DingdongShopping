@@ -30,7 +30,9 @@ export struct HomeResourceBitView {
       this.totalHeight += 208
     }
     if ((this.homeInfo?.diversion?.length ?? 0) > 0) {
-      this.totalHeight += 120
+      this.totalHeight += Math.ceil((this.homeInfo?.diversion?.length ?? 0) / 2) * 100 +
+        //+间距的总高度
+        10 * (Math.ceil((this.homeInfo?.diversion?.length ?? 0) / 2) + 1)
     }
     if ((this.homeInfo?.snapped?.length ?? 0) > 0) {
       this.totalHeight += 172
@@ -83,7 +85,7 @@ export struct HomeResourceBitView {
             })
         }
 
-        //高度：120
+        //高度：行高度（单行100）+间距（单个间距10），单行总高度=120
         if ((this.homeInfo?.diversion?.length ?? 0) > 0) {
           HomeDiversionView({ diversion: this.homeInfo?.diversion })
             .id('diversion')

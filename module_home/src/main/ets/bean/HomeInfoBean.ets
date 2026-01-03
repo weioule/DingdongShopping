@@ -11,7 +11,7 @@ export class HomeInfoBean {
   msgCount: number = 0 //消息数量
   banners: CategoryBean[] = [] //banners
   icons: CategoryBean[] = [] //图标列表
-  diversion: CategoryBean[] = [] //营销引流
+  diversion: Commodity[][] = [] //营销引流
   snapped: Commodity[] = [] //抢购商品列表
   commodityList: Commodity[] = [] //商品列表
 }

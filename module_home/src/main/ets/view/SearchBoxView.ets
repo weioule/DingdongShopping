@@ -13,6 +13,8 @@ export struct SearchBoxView {
   @Prop ratio: number = 0
   @State popularSearchesCurrentIndex: number = 0
   @State popularSearches: PopularSearchesBean[] = []
+  // 关键：也连接到全局索引
+  @StorageLink('globalScrollIndex') globalScrollIndex: number = 0
 
   build() {
     Row() {
@@ -31,12 +33,7 @@ export struct SearchBoxView {
         .height(17)
         .backgroundColor($r('[module_base].color.theme_color'))
 
-      SearchInput({
-        popularSearches: this.popularSearches,
-        onPopularSearchesIndexChange: (newIndex:number)=>{
-          this.popularSearchesCurrentIndex = newIndex
-        }
-      })
+      SearchInput({ popularSearches: this.popularSearches })
         .layoutWeight(1)
         .margin({ left: 10 })
 
@@ -59,7 +56,7 @@ export struct SearchBoxView {
         .textAlign(TextAlign.Center)
         .onClick(async () => {
           AppRouter.toSearchPage('', this.popularSearches.length > 0 ?
-            this.popularSearches[this.popularSearchesCurrentIndex % this.popularSearches.length] : undefined)
+            this.popularSearches[this.globalScrollIndex] : undefined)
         })
     }
     .height(35)

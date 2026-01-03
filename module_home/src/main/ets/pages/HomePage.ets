@@ -12,6 +12,7 @@ import { PopularSearchesBean } from 'module_base/src/main/ets/bean/PopularSearch
 import { PullToRefresh, RefreshState } from 'module_base/src/main/ets/refresh/MyPullToRefresh';
 import { StatusBarContentColor, StatusBarUtils } from 'module_base/src/main/ets/utils/StatusBarUtils';
 import { PullToRefreshConfigurator } from 'module_base/src/main/ets/refresh/MyPullToRefreshConfigurator';
+import { SwiperWithIndicatorView } from '../view/SwiperWithIndicatorView';
 
 export interface ResultParams {
   currentPage: number
@@ -204,7 +205,9 @@ export struct HomePage {
       WaterFlow({ scroller: this.contentListScroller, sections: this.sections }) {
         LazyForEach(this.dataSource, (commodity: Commodity, index) => {
           FlowItem() {
-            if (commodity.itemType == 0) {
+            if (commodity.itemType == 8) {
+              SwiperWithIndicatorView({ banners: commodity.commodityList })
+            } else if (commodity.itemType == 0) {
               CommodityItemView({ commodity: commodity, state: this.refreshState })
             } else if (commodity.itemType == 1) {
               EmptyView()
